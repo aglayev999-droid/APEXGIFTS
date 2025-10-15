@@ -22,7 +22,7 @@ export default function Header() {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [stars, setStars] = useState(defaultUserProfile.stars);
-  const [formattedStars, setFormattedStars] = useState(stars.toLocaleString());
+  const [formattedStars, setFormattedStars] = useState(defaultUserProfile.stars.toString());
   const wallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
   
