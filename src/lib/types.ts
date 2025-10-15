@@ -6,10 +6,15 @@ export type ImagePlaceholder = {
   price?: number;
 };
 
+export type Prize = ImagePlaceholder & {
+  chance: number; // Chance in percentage (e.g., 50 for 50%)
+};
+
+
 export type Case = {
   id: string;
   name: string;
   cost: number;
   image: ImagePlaceholder;
-  prizes: ImagePlaceholder[];
+  prizes: Prize[];
 };

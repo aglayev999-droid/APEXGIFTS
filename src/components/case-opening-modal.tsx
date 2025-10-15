@@ -14,9 +14,9 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import type { Case, ImagePlaceholder } from '@/lib/types';
+import type { Case, Prize } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Gift, Loader2 } from 'lucide-react';
+import { Gift, Loader2, Percent } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addInventoryItem, userProfile } from '@/lib/data';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
@@ -27,6 +27,21 @@ const REVEAL_DURATION_MS = 5000;
 const REEL_ITEM_WIDTH = 128; // 8rem in pixels (w-32)
 const MULTIPLIERS = [1, 3, 5, 10] as const;
 type Multiplier = typeof MULTIPLIERS[number];
+
+// Weighted random selection based on chance
+const selectPrize = (prizes: Prize[]): Prize => {
+  const totalChance = prizes.reduce((sum, prize) => sum + prize.chance, 0);
+  let random = Math.random() * totalChance;
+  for (const prize of prizes) {
+    if (random < prize.chance) {
+      return prize;
+    }
+    random -= prize.chance;
+  }
+  // Fallback in case of rounding errors
+  return prizes[prizes.length - 1];
+};
+
 
 // Fisher-Yates shuffle algorithm
 const shuffle = (array: any[]) => {
@@ -39,10 +54,10 @@ const shuffle = (array: any[]) => {
   return array;
 };
 
-function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className?: string }) {
+function PrizeDisplay({ prize, className, showChance }: { prize: Prize, className?: string, showChance?: boolean }) {
   const isStarPrize = prize.description.includes('Stars');
   return (
-    <div className={cn("bg-background/50 rounded-xl w-full h-full flex flex-col items-center justify-center p-2 text-center", className)}>
+    <div className={cn("bg-background/50 rounded-xl w-full h-full flex flex-col items-center justify-center p-2 text-center relative", className)}>
         <div className="relative w-full flex-grow">
             <Image
                 src={prize.imageUrl}
@@ -61,15 +76,21 @@ function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className
             </div>
           )}
         </div>
+        {showChance && (
+            <div className='absolute top-1 right-1 bg-black/50 text-white rounded-full px-1.5 py-0.5 text-[10px] font-bold flex items-center gap-0.5'>
+                <Percent className='w-2.5 h-2.5' />
+                <span>{prize.chance}</span>
+            </div>
+        )}
     </div>
   )
 }
 
 interface Reel {
   id: number;
-  items: ImagePlaceholder[];
+  items: Prize[];
   offset: number;
-  winningPrize: ImagePlaceholder;
+  winningPrize: Prize;
 }
 
 export function CaseOpeningModal({
@@ -81,7 +102,7 @@ export function CaseOpeningModal({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [wonPrizes, setWonPrizes] = useState<ImagePlaceholder[]>([]);
+  const [wonPrizes, setWonPrizes] = useState<Prize[]>([]);
   const [reels, setReels] = useState<Reel[]>([]);
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
   
@@ -110,13 +131,13 @@ export function CaseOpeningModal({
     }
 
     const newReels: Reel[] = [];
-    const finalPrizes: ImagePlaceholder[] = [];
+    const finalPrizes: Prize[] = [];
 
     for (let i = 0; i < multiplier; i++) {
         const prizePool = caseItem.prizes;
-        const shuffledPool = shuffle([...prizePool]);
+        const shuffledPool = shuffle([...prizePool, ...prizePool, ...prizePool]);
         const reelItems = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
-        const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
+        const winningPrize = selectPrize(prizePool);
         
         let winningIndex = -1;
         // Find a winning prize in the last 30% of the reel to ensure it spins for a bit
@@ -149,13 +170,22 @@ export function CaseOpeningModal({
     requestAnimationFrame(() => {
         setReels(prevReels => prevReels.map((reel, index) => {
              let winningIndex = -1;
+             // We must find the index of the exact prize we chose earlier in `finalPrizes`.
+             // We can't re-run the selection logic.
+             const finalPrizeForReel = finalPrizes[index];
              for (let j = Math.floor(reel.items.length * 0.7); j < reel.items.length - 5; j++) {
-                if (reel.items[j].id === finalPrizes[index].id) {
+                // Find the first instance of the winning prize ID in the target zone.
+                if (reel.items[j].id === finalPrizeForReel.id) {
                     winningIndex = j;
                     break;
                 }
              }
-             if (winningIndex === -1) { winningIndex = reel.items.length - 10; }
+
+             if (winningIndex === -1) { 
+                // Fallback: place the winning prize at a predictable spot if not found
+                winningIndex = reel.items.length - 10; 
+                reel.items[winningIndex] = finalPrizeForReel;
+             }
 
             // Calculate the target offset to center the winning prize
             const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6); // Randomness for visual variety
@@ -269,7 +299,7 @@ export function CaseOpeningModal({
                 <div className="grid grid-cols-4 gap-2">
                   {caseItem.prizes.map(prize => (
                     <div key={prize.id} className="p-1 bg-card rounded-md aspect-square">
-                        <PrizeDisplay prize={prize} />
+                        <PrizeDisplay prize={prize} showChance={true}/>
                     </div>
                   ))}
                 </div>

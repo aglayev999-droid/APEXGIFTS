@@ -1,6 +1,6 @@
 
 import placeholderData from './placeholder-images.json';
-import type { ImagePlaceholder } from './types';
+import type { ImagePlaceholder, Prize, InventoryItem } from './types';
 
 const images: ImagePlaceholder[] = placeholderData.placeholderImages;
 const findImage = (id: string) => {
@@ -18,40 +18,40 @@ export const userProfile = {
   stars: 10000,
 };
 
-const freeCasePrizes = [
-    findImage('stars-5'),
-    findImage('stars-10'),
-    findImage('stars-15'),
-    findImage('stars-20'),
+const freeCasePrizes: Prize[] = [
+    { ...findImage('stars-5'), chance: 50 },
+    { ...findImage('stars-10'), chance: 30 },
+    { ...findImage('stars-15'), chance: 15 },
+    { ...findImage('stars-20'), chance: 5 },
 ];
 
-const labubuCasePrizes = [
-    findImage('stars-100'),
-    findImage('desk-calendar'),
-    findImage('clover-pin'),
-    findImage('bow-tie'),
-    findImage('light-sword'),
-    findImage('skull-flower'),
-    findImage('voodoo-doll'),
+const labubuCasePrizes: Prize[] = [
+    { ...findImage('stars-100'), chance: 40 },
+    { ...findImage('desk-calendar'), chance: 20 },
+    { ...findImage('clover-pin'), chance: 15 },
+    { ...findImage('bow-tie'), chance: 10 },
+    { ...findImage('light-sword'), chance: 8 },
+    { ...findImage('skull-flower'), chance: 5 },
+    { ...findImage('voodoo-doll'), chance: 2 },
 ];
 
-const apexCasePrizes = [
-    findImage('stars-50'),
-    findImage('stars-100'),
-    findImage('desk-calendar'),
-    findImage('clover-pin'),
-    findImage('bow-tie'),
-    findImage('light-sword'),
-    findImage('love-potion'),
-    findImage('cupid-charm'),
+const apexCasePrizes: Prize[] = [
+    { ...findImage('stars-50'), chance: 40 },
+    { ...findImage('stars-100'), chance: 20 },
+    { ...findImage('desk-calendar'), chance: 12 },
+    { ...findImage('clover-pin'), chance: 10 },
+    { ...findImage('bow-tie'), chance: 8 },
+    { ...findImage('light-sword'), chance: 5 },
+    { ...findImage('love-potion'), chance: 3 },
+    { ...findImage('cupid-charm'), chance: 2 },
 ];
 
-const floorCasePrizes = [
-    findImage('stars-50'),
-    findImage('stars-100'),
-    findImage('clover-pin'),
-    findImage('bow-tie'),
-    findImage('light-sword'),
+const floorCasePrizes: Prize[] = [
+    { ...findImage('stars-50'), chance: 60 },
+    { ...findImage('stars-100'), chance: 25 },
+    { ...findImage('clover-pin'), chance: 8 },
+    { ...findImage('bow-tie'), chance: 5 },
+    { ...findImage('light-sword'), chance: 2 },
 ];
 
 export const cases = [
@@ -61,7 +61,6 @@ export const cases = [
   { id: 'case-4', name: 'Apex Case', cost: 500, image: findImage('case-500'), prizes: labubuCasePrizes },
 ];
 
-export type InventoryItem = { id: string; name: string; image: ImagePlaceholder };
 
 export let inventory: InventoryItem[] = [];
 
