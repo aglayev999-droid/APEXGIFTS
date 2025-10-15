@@ -14,7 +14,7 @@ export const userProfile = {
   name: 'nullrox',
   telegramId: '@nullrox',
   avatarUrl: findImage('user-avatar').imageUrl,
-  stars: 0,
+  stars: 10000,
 };
 
 const freeCasePrizes = [
@@ -57,8 +57,8 @@ const apexCasePrizes = [
 export const cases = [
   { id: 'case-1', name: 'Free Box', cost: 0, image: findImage('case-free'), prizes: freeCasePrizes },
   { id: 'case-2', name: 'Floor Case', cost: 180, image: findImage('case-180'), prizes: floorCasePrizes },
-  { id: 'case-3', name: 'Labubu Case', cost: 300, image: findImage('case-300'), prizes: apexCasePrizes },
-  { id: 'case-4', name: 'Apex Case', cost: 500, image: findImage('case-500'), prizes: labubuCasePrizes },
+  { id: 'case-3', name: 'Labubu Case', cost: 300, image: findImage('case-300'), prizes: labubuCasePrizes },
+  { id: 'case-4', name: 'Apex Case', cost: 500, image: findImage('case-500'), prizes: apexCasePrizes },
 ];
 
 export const inventory: { id: string; name: string; image: ImagePlaceholder }[] = [];
