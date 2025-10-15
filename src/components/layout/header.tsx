@@ -97,7 +97,7 @@ export default function Header() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-primary/30">
-            <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} className="w-5 h-5" />
+            <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={20} height={20} className="w-5 h-5" />
             <span className="font-bold text-lg text-foreground">{formattedStars}</span>
           </div>
           {wallet ? (

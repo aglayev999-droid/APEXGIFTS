@@ -51,7 +51,7 @@ function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className
           <p className="text-xs font-semibold truncate text-foreground">{prize.description}</p>
           {prize.price && !isStarPrize && (
             <div className="flex items-center justify-center gap-1 text-xs text-yellow-400">
-              <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={12} height={12} />
+              <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={12} height={12} />
               <span className='font-bold'>{prize.price}</span>
             </div>
           )}
@@ -191,7 +191,7 @@ export function CaseOpeningModal({
           >
               <div className='flex items-center justify-center gap-2'>
                 <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost.toLocaleString()}`: 'Spin for Free'}</span>
-                {caseItem.cost > 0 && <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} />}
+                {caseItem.cost > 0 && <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={20} height={20} />}
               </div>
           </Button>
            <Accordion type="single" collapsible className="w-full">

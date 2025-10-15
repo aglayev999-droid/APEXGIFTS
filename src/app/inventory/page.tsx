@@ -56,7 +56,7 @@ export default function InventoryPage() {
                 <CardTitle className="text-sm font-semibold truncate">{item.name}</CardTitle>
                 {item.image.price && (
                     <div className="flex items-center justify-start gap-1 text-xs text-yellow-400">
-                      <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={12} height={12} />
+                      <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={12} height={12} />
                       <span className='font-bold'>{item.image.price.toLocaleString()}</span>
                     </div>
                 )}

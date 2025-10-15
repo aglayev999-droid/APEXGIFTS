@@ -34,7 +34,7 @@ export default function Home() {
                   <CaseOpeningModal caseItem={caseItem}>
                     <div className="w-full bg-primary text-primary-foreground h-10 rounded-lg flex items-center justify-center gap-2 text-md font-bold cursor-pointer transition-all duration-300 group-hover:bg-primary/90 mt-2">
                        <span>{caseItem.cost}</span>
-                       <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} />
+                       <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={20} height={20} />
                     </div>
                   </CaseOpeningModal>
                 ) : (
