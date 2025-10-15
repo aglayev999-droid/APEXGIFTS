@@ -93,17 +93,17 @@ export function CaseOpeningModal({
 
     // --- Roulette Logic ---
     const prizePool = caseItem.prizes;
-    const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
     
-    // Create a long reel of items for the animation
-    const reel = Array(5).fill(prizePool).flat();
-    const shuffledReel = shuffle([...reel]);
+    // Create a long reel of items for the animation, ensuring it's well shuffled.
+    const reel = shuffle(Array(50).fill(prizePool).flat());
 
-    // Place the winning item at a predictable position towards the end
-    const winningIndex = shuffledReel.length - 5;
-    shuffledReel[winningIndex] = winningPrize;
+    // The winning index is a fixed position towards the end of the reel.
+    const winningIndex = reel.length - 5;
+    
+    // The actual winning prize is determined by what's at that fixed index.
+    const winningPrize = reel[winningIndex];
 
-    setReelItems(shuffledReel);
+    setReelItems(reel);
     setReelOffset(0); // Reset position
 
     // Force a browser reflow before starting the transition
@@ -256,3 +256,4 @@ export function CaseOpeningModal({
     </Dialog>
   );
 }
+
