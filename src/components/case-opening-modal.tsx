@@ -63,11 +63,11 @@ const shuffle = (array: any[]) => {
   return array;
 };
 
-function PrizeDisplay({ prize, className, showChance }: { prize: Prize, className?: string, showChance?: boolean }) {
+function PrizeDisplay({ prize, className, showChance, isWon = false }: { prize: Prize, className?: string, showChance?: boolean, isWon?: boolean }) {
   const isStarPrize = prize.description.includes('Stars');
   return (
     <div className={cn("bg-background/50 rounded-xl w-full h-full flex flex-col items-center justify-center p-2 text-center relative", className)}>
-        <div className="relative w-full flex-grow">
+        <div className={cn("relative w-full flex-grow", isWon && "animate-won-shimmer")}>
             <Image
                 src={prize.imageUrl}
                 alt={prize.description}
@@ -380,8 +380,8 @@ export function CaseOpeningModal({
         <ScrollArea className='w-full max-w-md flex-grow my-4'>
             <div className="grid grid-cols-3 gap-2 p-1">
                 {wonPrizes.map((prize, index) => (
-                    <div key={`${prize.id}-${index}`} className="aspect-square">
-                        <PrizeDisplay prize={prize} />
+                    <div key={`${prize.id}-${index}`} className="aspect-square animate-won-glow">
+                        <PrizeDisplay prize={prize} isWon={true} />
                     </div>
                 ))}
             </div>
