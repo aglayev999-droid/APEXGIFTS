@@ -1,7 +1,7 @@
 {
-  "url": "https://your-app-url.com",
+  "url": "https://<your-app-url>",
   "name": "Apex Gift Bot",
-  "iconUrl": "https://your-app-url.com/icon.png",
-  "termsOfUseUrl": "https://your-app-url.com/terms-of-use.html",
-  "privacyPolicyUrl": "https://your-app-url.com/privacy-policy.html"
+  "iconUrl": "https://<your-app-url>/icon.png",
+  "termsOfUseUrl": "https://<your-app-url>/terms-of-use.html",
+  "privacyPolicyUrl": "https://<your-app-url>/privacy-policy.html"
 }

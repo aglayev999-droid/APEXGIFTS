@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/tonconnect-manifest.json',
-        destination: '/tonconnect-manifest.json',
+        destination: '/api/tonconnect-manifest',
       },
     ];
   },

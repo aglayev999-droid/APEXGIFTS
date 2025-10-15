@@ -1,18 +1,21 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Header from './header';
 import BottomNav from './bottom-nav';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  const manifestUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/tonconnect-manifest.json` 
-    : '';
+  const [manifestUrl, setManifestUrl] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+    // This ensures the window object is available before setting the URL.
+    if (typeof window !== 'undefined') {
+      setManifestUrl(`${window.location.origin}/tonconnect-manifest.json`);
+    }
+    
+    if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
     }
   }, []);
@@ -67,4 +70,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       </div>
     </TonConnectUIProvider>
   );
+}
+
+declare global {
+  interface Window {
+    Telegram: any;
+  }
 }
