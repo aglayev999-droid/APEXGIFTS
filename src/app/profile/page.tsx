@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Bot, PlusCircle } from 'lucide-react';
+import { Share2, Bot } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DepositStars } from '@/components/deposit-stars';
 
 type TelegramUser = {
   id: number;
@@ -40,16 +41,23 @@ export default function ProfilePage() {
       setLoading(false);
     } else {
         // Fallback for when not in Telegram environment
+        setUser(null);
         setLoading(false);
     }
   }, []);
   
-  const handleDepositClick = () => {
-    toast({
-        title: 'Telegram Only Feature',
-        description: 'Deposits can only be made within the Telegram app.',
-        variant: 'destructive',
-      });
+  const handleShareClick = () => {
+    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        const shareUrl = `https://t.me/share/url?url=https://t.me/your_bot_username&text=Check out this cool bot!`;
+        tg.openTelegramLink(shareUrl);
+    } else {
+        toast({
+            title: 'Telegram Only Feature',
+            description: 'Sharing is only available within the Telegram app.',
+            variant: 'destructive',
+        });
+    }
   }
 
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
@@ -85,7 +93,7 @@ export default function ProfilePage() {
             <CardDescription>Get rewards for inviting your friends to play.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full">
+            <Button className="w-full" onClick={handleShareClick}>
               <Share2 className="mr-2 h-4 w-4" />
               Share Invite Link
             </Button>
@@ -97,10 +105,7 @@ export default function ProfilePage() {
             <CardDescription>Add more stars to your balance to open cases.</CardDescription>
           </CardHeader>
           <CardContent>
-             <Button className="w-full" onClick={handleDepositClick}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Deposit
-            </Button>
+             <DepositStars />
           </CardContent>
         </Card>
       </div>
