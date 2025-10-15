@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { ReactNode } from 'react';
@@ -12,6 +13,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     // This ensures the window object is available before setting the URL.
     if (typeof window !== 'undefined') {
+      // The rewrite in next.config.ts handles this path
       setManifestUrl(`${window.location.origin}/tonconnect-manifest.json`);
     }
     
@@ -19,6 +21,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       window.Telegram.WebApp.ready();
     }
   }, []);
+
+  // Don't render the provider until the manifestUrl is set on the client
+  if (!manifestUrl) {
+    return null; 
+  }
 
   return (
     <TonConnectUIProvider 
