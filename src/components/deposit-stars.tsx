@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/context/language-context';
 
 export function DepositStars() {
+  const { t } = useTranslation();
   const [isDepositing, setIsDepositing] = useState(false);
   const { toast } = useToast();
 
@@ -17,8 +19,8 @@ export function DepositStars() {
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
       if (invoiceSlug === 'YOUR_INVOICE_SLUG') {
         toast({
-          title: 'Configuration Needed',
-          description: 'Please replace "YOUR_INVOICE_SLUG" in src/components/deposit-stars.tsx with a real invoice slug from BotFather.',
+          title: t('Configuration Needed'),
+          description: t('Please replace "YOUR_INVOICE_SLUG" in src/components/deposit-stars.tsx with a real invoice slug from BotFather.'),
           variant: 'destructive',
           duration: 5000,
         });
@@ -33,22 +35,22 @@ export function DepositStars() {
         setIsDepositing(false);
         if (status === 'paid') {
           toast({
-            title: 'Deposit Successful!',
-            description: 'Your stars have been added to your account.',
+            title: t('Deposit Successful!'),
+            description: t('Your stars have been added to your account.'),
           });
           // Here you would typically update the user's star balance in your database.
         } else if (status === 'failed') {
           toast({
-            title: 'Deposit Failed',
-            description: 'Something went wrong. Please try again.',
+            title: t('Deposit Failed'),
+            description: t('Something went wrong. Please try again.'),
             variant: 'destructive',
           });
         }
       });
     } else {
         toast({
-            title: 'Telegram Only Feature',
-            description: 'Deposits can only be made within the Telegram app.',
+            title: t('Telegram Only Feature'),
+            description: t('Deposits can only be made within the Telegram app.'),
             variant: 'destructive',
         });
         setIsDepositing(false);
@@ -62,7 +64,7 @@ export function DepositStars() {
       ) : (
         <PlusCircle className="mr-2 h-4 w-4" />
       )}
-      {isDepositing ? 'Processing...' : 'Deposit'}
+      {isDepositing ? t('Processing...') : t('Deposit')}
     </Button>
   );
 }

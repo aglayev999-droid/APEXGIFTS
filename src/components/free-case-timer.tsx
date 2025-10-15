@@ -5,6 +5,7 @@ import { CaseOpeningModal } from './case-opening-modal';
 import { cases } from '@/lib/data';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/context/language-context';
 
 // Returns the date string for the current day in UTC
 const getTodayUTCString = () => {
@@ -22,6 +23,7 @@ const getNextFreeCaseTime = () => {
 };
 
 export function FreeCaseTimer() {
+  const { t } = useTranslation();
   const [timeLeft, setTimeLeft] = useState('');
   const [canClaim, setCanClaim] = useState(false);
   
@@ -37,7 +39,7 @@ export function FreeCaseTimer() {
   useEffect(() => {
     if (checkCanClaim()) {
       setCanClaim(true);
-      setTimeLeft("Claim Now!");
+      setTimeLeft(t("Claim Now!"));
       return;
     } else {
         setCanClaim(false);
@@ -46,7 +48,7 @@ export function FreeCaseTimer() {
     const calculateTimeLeft = () => {
       const difference = getNextFreeCaseTime() - new Date().getTime();
       
-      let timeLeftString = "Already Claimed";
+      let timeLeftString = t("Already Claimed");
 
       if (difference > 0) {
         const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
@@ -60,7 +62,7 @@ export function FreeCaseTimer() {
       } else {
         // Time is up, user can claim now
         setCanClaim(true);
-        timeLeftString = "Claim Now!";
+        timeLeftString = t("Claim Now!");
       }
       
       return timeLeftString;
@@ -69,7 +71,7 @@ export function FreeCaseTimer() {
     const interval = setInterval(() => {
         if (checkCanClaim()) {
             setCanClaim(true);
-            setTimeLeft("Claim Now!");
+            setTimeLeft(t("Claim Now!"));
             clearInterval(interval);
         } else {
             setTimeLeft(calculateTimeLeft());
@@ -77,7 +79,7 @@ export function FreeCaseTimer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [t]);
 
   const onCaseOpened = () => {
     const today = getTodayUTCString();

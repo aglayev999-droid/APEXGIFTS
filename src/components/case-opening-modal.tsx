@@ -22,6 +22,7 @@ import { addInventoryItem, userProfile, updateLeaderboard } from '@/lib/data';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { ScrollArea } from './ui/scroll-area';
+import { useTranslation } from '@/context/language-context';
 
 const REVEAL_DURATION_MS = 5000;
 const REEL_ITEM_WIDTH = 128; // 8rem in pixels (w-32)
@@ -63,6 +64,7 @@ const shuffle = (array: any[]) => {
 };
 
 function PrizeDisplay({ prize, className, showChance }: { prize: Prize, className?: string, showChance?: boolean }) {
+  const { t } = useTranslation();
   const isStarPrize = prize.description.includes('Stars');
   return (
     <div className={cn("bg-background/50 rounded-xl w-full h-full flex flex-col items-center justify-center p-2 text-center relative", className)}>
@@ -76,7 +78,7 @@ function PrizeDisplay({ prize, className, showChance }: { prize: Prize, classNam
             />
         </div>
         <div className="mt-2 text-center">
-          <p className="text-xs font-semibold truncate text-foreground">{prize.description}</p>
+          <p className="text-xs font-semibold truncate text-foreground">{t(prize.description)}</p>
           {prize.price && !isStarPrize && (
             <div className="flex items-center justify-center gap-1 text-xs text-yellow-400">
               <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={12} height={12} />
@@ -112,6 +114,7 @@ export function CaseOpeningModal({
   onCaseOpened?: () => void;
   isDisabled?: boolean;
 }) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrizes, setWonPrizes] = useState<Prize[]>([]);
@@ -139,8 +142,8 @@ export function CaseOpeningModal({
 
     if (userProfile.stars < totalCost && caseItem.cost > 0) {
       toast({
-        title: 'Not enough stars!',
-        description: `You need ${totalCost} stars to open ${multiplier}x case(s).`,
+        title: t('Not enough stars!'),
+        description: t('You need {{totalCost}} stars to open {{multiplier}}x case(s).', { totalCost, multiplier }),
         variant: 'destructive',
       });
       return;
@@ -257,7 +260,7 @@ export function CaseOpeningModal({
   const renderInitialView = () => (
     <div className='flex flex-col h-full'>
       <DialogHeader className="p-4 border-b border-border">
-        <DialogTitle className="text-lg font-semibold text-center">{caseItem.name}</DialogTitle>
+        <DialogTitle className="text-lg font-semibold text-center">{t(caseItem.name)}</DialogTitle>
       </DialogHeader>
       
       <div className="flex-grow flex flex-col items-center justify-center p-6 text-center">
@@ -272,7 +275,7 @@ export function CaseOpeningModal({
           </div>
            {caseItem.cost > 0 && (
              <div className='mt-4 w-full'>
-                <p className="text-muted-foreground mb-2">How many to open?</p>
+                <p className="text-muted-foreground mb-2">{t('How many to open?')}</p>
                 <RadioGroup 
                     defaultValue="1" 
                     className="grid grid-cols-4 gap-2"
@@ -308,7 +311,7 @@ export function CaseOpeningModal({
           >
             {isSpinning ? <Loader2 className="w-6 h-6 animate-spin" /> : (
               <div className='flex items-center justify-center gap-2'>
-                <span>{caseItem.cost > 0 ? `Spin for ${totalCost.toLocaleString()}`: (isDisabled ? 'Come back later' : 'Spin for Free')}</span>
+                <span>{caseItem.cost > 0 ? t('Spin for {{totalCost}}', { totalCost: totalCost.toLocaleString() }) : (isDisabled ? t('Come back later') : t('Spin for Free'))}</span>
                 {caseItem.cost > 0 && <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={20} height={20} />}
               </div>
             )}
@@ -317,7 +320,7 @@ export function CaseOpeningModal({
             <AccordionItem value="item-1" className="border-none">
               <AccordionTrigger className="w-full h-12 bg-card/50 hover:no-underline rounded-lg px-4 justify-center gap-2 text-muted-foreground">
                 <Gift className="w-5 h-5" />
-                <span>Prizes Inside</span>
+                <span>{t('Prizes Inside')}</span>
               </AccordionTrigger>
               <AccordionContent className="p-4 bg-background/80 rounded-b-lg">
                 <ScrollArea className="h-48">
@@ -338,7 +341,7 @@ export function CaseOpeningModal({
 
   const renderSpinningView = () => (
     <div className="h-full flex flex-col items-center justify-center relative overflow-hidden bg-card/80 text-center p-6">
-      <h2 className="text-3xl font-bold font-headline mb-4">Opening {multiplier > 1 ? `${multiplier} cases...` : '...'}</h2>
+      <h2 className="text-3xl font-bold font-headline mb-4">{t('Opening {{multiplier}} case(s)...', { multiplier })}</h2>
       <ScrollArea className="w-full flex-grow">
           <div className='flex flex-col items-center gap-4 py-4'>
             {reels.map((reel) => (
@@ -374,7 +377,7 @@ export function CaseOpeningModal({
 
   const renderWonView = () => (
      <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-card/80">
-        <h2 className="text-3xl font-bold font-headline mb-4">You Won!</h2>
+        <h2 className="text-3xl font-bold font-headline mb-4">{t('You Won!')}</h2>
         <ScrollArea className='w-full max-w-md flex-grow my-4'>
             <div className="grid grid-cols-3 gap-2 p-1">
                 {wonPrizes.map((prize, index) => (
@@ -385,14 +388,14 @@ export function CaseOpeningModal({
             </div>
         </ScrollArea>
         <p className="text-muted-foreground mb-6">
-            Your new items have been added to your inventory.
+            {t('Your new items have been added to your inventory.')}
         </p>
         <div className="flex flex-col gap-2 w-full max-w-sm">
             <Button onClick={handleGoToInventory}>
                 <Gift className="mr-2 h-4 w-4" />
-                Go to Inventory
+                {t('Go to Inventory')}
             </Button>
-            <Button variant="outline" onClick={reset}>Close</Button>
+            <Button variant="outline" onClick={reset}>{t('Close')}</Button>
         </div>
     </div>
   )

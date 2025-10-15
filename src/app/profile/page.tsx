@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { useTranslation } from '@/context/language-context';
 
 
 type TelegramUser = {
@@ -26,9 +27,9 @@ type TelegramUser = {
 };
 
 export default function ProfilePage() {
+  const { language, setLanguage, t } = useTranslation();
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [language, setLanguage] = useState('en');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -58,19 +59,19 @@ export default function ProfilePage() {
   const handleShareClick = () => {
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
         const tg = window.Telegram.WebApp;
-        const shareUrl = `https://t.me/share/url?url=https://t.me/your_bot_username&text=Check out this cool bot!`;
+        const shareUrl = `https://t.me/share/url?url=https://t.me/your_bot_username&text=${encodeURIComponent(t('Check out this cool bot!'))}`;
         tg.openTelegramLink(shareUrl);
     } else {
         toast({
-            title: 'Telegram Only Feature',
-            description: 'Sharing is only available within the Telegram app.',
+            title: t('Telegram Only Feature'),
+            description: t('Sharing is only available within the Telegram app.'),
             variant: 'destructive',
         });
     }
   }
 
-  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
-  const displayUsername = user?.username ? `@${user.username}` : 'No Telegram ID';
+  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : t('Guest');
+  const displayUsername = user?.username ? `@${user.username}` : t('No Telegram ID');
   const avatarUrl = user?.photo_url;
   const avatarFallback = displayName.charAt(0).toUpperCase();
 
@@ -98,20 +99,20 @@ export default function ProfilePage() {
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
           <CardHeader>
-            <CardTitle className="text-lg">Invite Friends</CardTitle>
-            <CardDescription>Get rewards for inviting your friends to play.</CardDescription>
+            <CardTitle className="text-lg">{t('Invite Friends')}</CardTitle>
+            <CardDescription>{t('Get rewards for inviting your friends to play.')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={handleShareClick}>
               <Share2 className="mr-2 h-4 w-4" />
-              Share Invite Link
+              {t('Share Invite Link')}
             </Button>
           </CardContent>
         </Card>
         <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
           <CardHeader>
-            <CardTitle className="text-lg">Deposit Stars</CardTitle>
-            <CardDescription>Add more stars to your balance to open cases.</CardDescription>
+            <CardTitle className="text-lg">{t('Deposit Stars')}</CardTitle>
+            <CardDescription>{t('Add more stars to your balance to open cases.')}</CardDescription>
           </CardHeader>
           <CardContent>
              <DepositStars />
@@ -123,29 +124,29 @@ export default function ProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
                 <Globe />
-                Language
+                {t('Language')}
             </CardTitle>
-            <CardDescription>Choose your preferred language.</CardDescription>
+            <CardDescription>{t('Choose your preferred language.')}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Select value={language} onValueChange={setLanguage}>
+            <Select value={language} onValueChange={(value) => setLanguage(value as 'en' | 'ru' | 'uz')}>
                 <SelectTrigger>
-                    <SelectValue placeholder="Select a language" />
+                    <SelectValue placeholder={t('Select a language')} />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectItem value="en">
                         <div className='flex items-center gap-2'>
-                           <span>🇺🇸</span> English
+                           <span>🇺🇸</span> {t('English')}
                         </div>
                     </SelectItem>
                     <SelectItem value="ru">
                         <div className='flex items-center gap-2'>
-                            <span>🇷🇺</span> Russian
+                            <span>🇷🇺</span> {t('Russian')}
                         </div>
                     </SelectItem>
                     <SelectItem value="uz">
                        <div className='flex items-center gap-2'>
-                            <span>🇺🇿</span> Uzbek
+                            <span>🇺🇿</span> {t('Uzbek')}
                        </div>
                     </SelectItem>
                 </SelectContent>
@@ -155,13 +156,13 @@ export default function ProfilePage() {
 
       <Card className="mt-4 bg-card/50 backdrop-blur-sm border-primary/20">
         <CardHeader>
-            <CardTitle className="text-lg">Bot Connection</CardTitle>
+            <CardTitle className="text-lg">{t('Bot Connection')}</CardTitle>
         </CardHeader>
         <CardContent className="flex items-center gap-4">
             <Bot className="h-8 w-8 text-primary" />
             <div>
-                <p className="font-semibold">Connected to @ApexGiftBot</p>
-                <p className="text-sm text-muted-foreground">Your gifts and notifications are handled by our Telegram bot.</p>
+                <p className="font-semibold">{t('Connected to @ApexGiftBot')}</p>
+                <p className="text-sm text-muted-foreground">{t('Your gifts and notifications are handled by our Telegram bot.')}</p>
             </div>
         </CardContent>
       </Card>

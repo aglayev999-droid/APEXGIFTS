@@ -4,16 +4,18 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, LayoutGrid, Trophy, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '/', label: 'Cases', icon: Home },
-  { href: '/inventory', label: 'Inventory', icon: LayoutGrid },
-  { href: '/leaderboard', label: 'Leaders', icon: Trophy },
-  { href: '/profile', label: 'Profile', icon: User },
-];
+import { useTranslation } from '@/context/language-context';
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { href: '/', label: t('Cases'), icon: Home },
+    { href: '/inventory', label: t('Inventory'), icon: LayoutGrid },
+    { href: '/leaderboard', label: t('Leaders'), icon: Trophy },
+    { href: '/profile', label: t('Profile'), icon: User },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-card/80 backdrop-blur-sm border-t border-border">

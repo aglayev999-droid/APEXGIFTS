@@ -6,8 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/context/language-context';
 
 export default function LeaderboardPage() {
+    const { t } = useTranslation();
     const [_, setForceRender] = useState(0);
 
     // This effect will re-run when the page is focused, providing a simple way to refresh data
@@ -22,15 +24,15 @@ export default function LeaderboardPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">Top Collectors</h1>
-        <p className="text-muted-foreground mt-2">See who's leading the pack.</p>
+        <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">{t('Top Collectors')}</h1>
+        <p className="text-muted-foreground mt-2">{t("See who's leading the pack.")}</p>
       </div>
 
       <Card className="bg-card/50 backdrop-blur-sm border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Trophy className="text-yellow-400" />
-            Leaderboard
+            {t('Leaderboard')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -38,9 +40,9 @@ export default function LeaderboardPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-primary/20">
-                <TableHead className="w-[50px]">Rank</TableHead>
-                <TableHead>User</TableHead>
-                <TableHead className="text-right">Cases Opened</TableHead>
+                <TableHead className="w-[50px]">{t('Rank')}</TableHead>
+                <TableHead>{t('User')}</TableHead>
+                <TableHead className="text-right">{t('Cases Opened')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -78,8 +80,8 @@ export default function LeaderboardPage() {
           </Table>
            ) : (
             <div className="text-center py-10">
-                <p className="text-muted-foreground">The leaderboard is empty.</p>
-                <p className="text-muted-foreground">Open some cases to get on the board!</p>
+                <p className="text-muted-foreground">{t('The leaderboard is empty.')}</p>
+                <p className="text-muted-foreground">{t('Open some cases to get on the board!')}</p>
             </div>
            )}
         </CardContent>

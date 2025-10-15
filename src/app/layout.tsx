@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import AppLayout from '@/components/layout/app-layout';
 import Script from 'next/script';
+import { LanguageProvider } from '@/context/language-context';
 
 export const metadata: Metadata = {
   title: 'Apex Gift Bot',
@@ -22,10 +23,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
-        <AppLayout>
-          {children}
-        </AppLayout>
-        <Toaster />
+        <LanguageProvider>
+          <AppLayout>
+            {children}
+          </AppLayout>
+          <Toaster />
+        </LanguageProvider>
         <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
       </body>
     </html>
