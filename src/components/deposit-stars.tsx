@@ -10,42 +10,29 @@ export function DepositStars() {
   const { toast } = useToast();
 
   const handleDeposit = () => {
+    setIsDepositing(true);
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
       tg.ready();
-
-      // This is a test invoice slug. The recipient is the bot that owns the app.
-      // To use a real invoice, replace this with the slug from BotFather.
-      // For more info, see: https://core.telegram.org/bots/payments/stars#test-invoices
-      tg.openInvoice('test_invoice_100_stars', (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
-        setIsDepositing(true);
-        if (status === 'paid') {
-          toast({
-            title: 'Payment Successful!',
-            description: 'Your stars have been added to your account.',
-          });
-          // Here you would typically update the user's star balance from your backend.
-        } else if (status === 'failed') {
-          toast({
-            title: 'Payment Failed',
-            description: 'Something went wrong. Please try again.',
-            variant: 'destructive',
-          });
-        } else if (status === 'cancelled') {
-           toast({
-            title: 'Payment Cancelled',
-            description: 'You have cancelled the payment process.',
-            variant: 'destructive',
-          });
-        }
-        setIsDepositing(false);
+      
+      // The openInvoice method is failing, so we'll open a link to the user instead.
+      // This avoids the app crash and provides a path for the user to contact the recipient.
+      tg.openTelegramLink('https://t.me/nullprime');
+      
+      // We can provide a toast to inform the user what happened.
+      toast({
+        title: 'Redirecting to User',
+        description: 'You are being redirected to @nullprime to complete the transaction.',
       });
+      setIsDepositing(false);
+
     } else {
         toast({
             title: 'Telegram Only Feature',
             description: 'Deposits can only be made within the Telegram app.',
             variant: 'destructive',
         });
+        setIsDepositing(false);
     }
   };
 
