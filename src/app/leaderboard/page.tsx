@@ -1,5 +1,5 @@
 'use client';
-import { leaderboard } from '@/lib/data';
+import { getLeaderboard, type LeaderboardEntry } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -10,15 +10,29 @@ import { useTranslation } from '@/context/language-context';
 
 export default function LeaderboardPage() {
     const { t } = useTranslation();
-    const [_, setForceRender] = useState(0);
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
 
-    // This effect will re-run when the page is focused, providing a simple way to refresh data
     useEffect(() => {
+        // Load leaderboard from localStorage on component mount
+        setLeaderboard(getLeaderboard());
+
         const handleFocus = () => {
-            setForceRender(Math.random());
+            setLeaderboard(getLeaderboard());
         };
+        
+        // Refresh data when window gets focus
         window.addEventListener('focus', handleFocus);
-        return () => window.removeEventListener('focus', handleFocus);
+        
+        // Also listen for a custom event that we can dispatch after opening a case
+        const handleStorageUpdate = () => {
+             setLeaderboard(getLeaderboard());
+        }
+        window.addEventListener('leaderboardUpdated', handleStorageUpdate);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+            window.removeEventListener('leaderboardUpdated', handleStorageUpdate);
+        }
     }, []);
 
   return (

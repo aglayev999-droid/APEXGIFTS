@@ -74,9 +74,28 @@ export const removeInventoryItem = (itemId: string) => {
 
 export const allPrizes = [...new Set([...freeCasePrizes, ...floorCasePrizes, ...labubuCasePrizes, ...apexCasePrizes])];
 
-export let leaderboard: LeaderboardEntry[] = [];
+// --- Leaderboard Logic ---
+const LEADERBOARD_KEY = 'apex-gift-bot-leaderboard';
+
+// Function to get leaderboard from localStorage
+export const getLeaderboard = (): LeaderboardEntry[] => {
+    if (typeof window === 'undefined') {
+        return [];
+    }
+    const storedLeaderboard = localStorage.getItem(LEADERBOARD_KEY);
+    return storedLeaderboard ? JSON.parse(storedLeaderboard) : [];
+};
+
+// Function to save leaderboard to localStorage
+const saveLeaderboard = (leaderboard: LeaderboardEntry[]) => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+};
 
 export const updateLeaderboard = (user: { name: string; avatar: string }, casesOpened: number) => {
+  const leaderboard = getLeaderboard();
   const existingUserIndex = leaderboard.findIndex(entry => entry.user === user.name);
 
   if (existingUserIndex > -1) {
@@ -97,4 +116,11 @@ export const updateLeaderboard = (user: { name: string; avatar: string }, casesO
   leaderboard.forEach((entry, index) => {
     entry.rank = index + 1;
   });
+
+  saveLeaderboard(leaderboard);
+
+  // Dispatch a custom event to notify other components (like the leaderboard page)
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('leaderboardUpdated'));
+  }
 };
