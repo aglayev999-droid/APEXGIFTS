@@ -1,20 +1,79 @@
-import Image from 'next/image';
-import { userProfile } from '@/lib/data';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { userProfile as defaultUserProfile } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, PlusCircle, Bot } from 'lucide-react';
+import { Share2, Bot } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { DepositStars } from '@/components/deposit-stars';
+import { Skeleton } from '@/components/ui/skeleton';
+
+type TelegramUser = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+};
 
 export default function ProfilePage() {
+  const [user, setUser] = useState<TelegramUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      
+      const tgUser = tg.initDataUnsafe?.user;
+
+      if (tgUser) {
+        setUser({
+          id: tgUser.id,
+          first_name: tgUser.first_name,
+          last_name: tgUser.last_name,
+          username: tgUser.username,
+          photo_url: tgUser.photo_url
+        });
+      }
+      setLoading(false);
+    } else {
+        // Fallback for when not in Telegram environment
+        setUser({
+            id: 12345,
+            first_name: defaultUserProfile.name,
+            username: defaultUserProfile.telegramId.replace('@', ''),
+            photo_url: defaultUserProfile.avatarUrl,
+        })
+        setLoading(false);
+    }
+  }, []);
+
+  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
+  const displayUsername = user?.username ? `@${user.username}` : 'No Telegram ID';
+  const avatarUrl = user?.photo_url || defaultUserProfile.avatarUrl;
+  const avatarFallback = displayName.charAt(0).toUpperCase();
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col items-center text-center">
-        <Avatar className="w-24 h-24 border-4 border-primary mb-4">
-          <AvatarImage src={userProfile.avatarUrl} alt={userProfile.name} />
-          <AvatarFallback>{userProfile.name.charAt(0).toUpperCase()}</AvatarFallback>
-        </Avatar>
-        <h1 className="text-3xl font-bold font-headline">{userProfile.name}</h1>
-        <p className="text-muted-foreground">{userProfile.telegramId}</p>
+        {loading ? (
+            <>
+                <Skeleton className="w-24 h-24 rounded-full mb-4" />
+                <Skeleton className="h-8 w-40 mb-2" />
+                <Skeleton className="h-5 w-32" />
+            </>
+        ) : (
+            <>
+                <Avatar className="w-24 h-24 border-4 border-primary mb-4">
+                  <AvatarImage src={avatarUrl} alt={displayName} />
+                  <AvatarFallback>{avatarFallback}</AvatarFallback>
+                </Avatar>
+                <h1 className="text-3xl font-bold font-headline">{displayName}</h1>
+                <p className="text-muted-foreground">{displayUsername}</p>
+            </>
+        )}
       </div>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -36,10 +95,7 @@ export default function ProfilePage() {
             <CardDescription>Add more stars to your balance to open cases.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Deposit
-            </Button>
+            <DepositStars />
           </CardContent>
         </Card>
       </div>
@@ -58,4 +114,11 @@ export default function ProfilePage() {
       </Card>
     </div>
   );
+}
+
+// Add this to your global types or a declarations file (e.g., globals.d.ts)
+declare global {
+  interface Window {
+    Telegram: any;
+  }
 }
