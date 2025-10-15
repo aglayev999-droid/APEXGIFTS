@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ApexLogo } from '@/components/icons/apex-logo';
 import { StarIcon } from '@/components/icons/star-icon';
 import { userProfile } from '@/lib/data';
@@ -9,6 +9,11 @@ import { Wallet } from 'lucide-react';
 
 export default function Header() {
   const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const [formattedStars, setFormattedStars] = useState<string | number>(userProfile.stars);
+
+  useEffect(() => {
+    setFormattedStars(userProfile.stars.toLocaleString());
+  }, []);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
@@ -20,7 +25,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-primary/30">
             <StarIcon className="w-5 h-5 text-yellow-400" />
-            <span className="font-bold text-lg text-foreground">{userProfile.stars.toLocaleString()}</span>
+            <span className="font-bold text-lg text-foreground">{formattedStars}</span>
           </div>
           <Button
             size="sm"
