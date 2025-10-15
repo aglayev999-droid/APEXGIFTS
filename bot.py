@@ -12,6 +12,10 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    if message.text == '/start deposit':
+        command_deposit(message)
+        return
+
     markup = types.InlineKeyboardMarkup(row_width=1)
     
     web_app_info = types.WebAppInfo(WEB_APP_URL)
@@ -62,9 +66,9 @@ def checkout(pre_checkout_query):
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
     bot.send_message(message.chat.id,
-                     'Thank you for your payment! We have added {} {} to your account.'.format(
+                     'Hooray! Thanks for your payment of {} stars. Your balance will be updated shortly.'.format(
                          message.successful_payment.total_amount,
-                         message.successful_payment.currency))
+                         ))
 
 
 print("Bot is polling...")
