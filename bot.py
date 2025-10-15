@@ -1,8 +1,12 @@
 import telebot
 from telebot import types
+import os
 
-BOT_TOKEN = "8239930030:AAGOiMTBYTstZVINTEGVFEzm5Jeee1hBFJM"
-WEB_APP_URL = "https://your-app-url.com"
+# It's better to get the token from environment variables
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "8239930030:AAGOiMTBYTstZVINTEGVFEzm5Jeee1hBFJM")
+WEB_APP_URL = os.environ.get("WEB_APP_URL", "https://your-app-url.com")
+PAYMENT_PROVIDER_TOKEN = os.environ.get("PAYMENT_PROVIDER_TOKEN", "398062629:TEST:999999999_F91D8F69C042267444B74CC0B3C747757EB0E065")
+
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
@@ -30,6 +34,38 @@ def send_welcome(message):
         welcome_text, 
         reply_markup=markup
     )
+
+@bot.message_handler(commands=['deposit'])
+def command_deposit(message):
+    prices = [
+        types.LabeledPrice(label='100 Stars', amount=100),
+        types.LabeledPrice(label='500 Stars', amount=500),
+        types.LabeledPrice(label='1000 Stars', amount=1000),
+    ]
+
+    bot.send_invoice(
+        message.chat.id,
+        title='Deposit Stars',
+        description='Add stars to your balance to open more cases!',
+        provider_token=PAYMENT_PROVIDER_TOKEN,
+        currency='XTR',
+        prices=prices,
+        start_parameter='deposit-stars',
+        invoice_payload='CUSTOM-PAYLOAD'
+    )
+
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(pre_checkout_query):
+    bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
+                                  error_message="Oops, something went wrong. Please try again later.")
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    bot.send_message(message.chat.id,
+                     'Thank you for your payment! We have added {} {} to your account.'.format(
+                         message.successful_payment.total_amount,
+                         message.successful_payment.currency))
+
 
 print("Bot is polling...")
 bot.infinity_polling()

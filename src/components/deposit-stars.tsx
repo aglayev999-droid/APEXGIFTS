@@ -6,54 +6,25 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/context/language-context';
 
-// Function to generate a unique slug for each transaction
-function generateInvoiceSlug() {
-    return 'deposit_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-}
-
 export function DepositStars() {
   const { t } = useTranslation();
   const [isDepositing, setIsDepositing] = useState(false);
   const { toast } = useToast();
 
-  const handleDeposit = async () => {
+  const handleDeposit = () => {
     setIsDepositing(true);
     
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
       tg.ready();
 
-      const invoiceSlug = generateInvoiceSlug();
-      
-      try {
-        // The showInvoice method returns a promise, it does not take a callback.
-        const result = await tg.showInvoice({ slug: invoiceSlug });
+      // This opens a link to the bot with a pre-filled command to start the deposit process.
+      // The bot will then show an invoice.
+      tg.openTelegramLink(`https://t.me/apexgiftbot?start=deposit`);
 
-        if (result.status === 'paid') {
-          toast({
-            title: t('Deposit Successful!'),
-            description: t('Your stars have been added to your account.'),
-          });
-          // IMPORTANT: You need to verify the payment on your backend
-          // and credit the stars to the user's account.
-        } else if (result.status === 'failed') {
-          toast({
-            title: t('Deposit Failed'),
-            description: t('Something went wrong. Please try again.'),
-            variant: 'destructive',
-          });
-        }
-        // Handle 'cancelled' and 'pending' statuses if needed
-      } catch (error) {
-        console.error('Invoice error:', error);
-        toast({
-          title: t('Deposit Failed'),
-          description: t('An error occurred while processing the payment.'),
-          variant: 'destructive',
-        });
-      } finally {
-        setIsDepositing(false);
-      }
+      // We don't know when the user will finish, so we can reset the button state after a short delay
+      setTimeout(() => setIsDepositing(false), 2000);
+
     } else {
         toast({
             title: t('Telegram Only Feature'),
