@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
+import { useEffect } from 'react';
 import Header from './header';
 import BottomNav from './bottom-nav';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
@@ -9,6 +10,12 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const manifestUrl = typeof window !== 'undefined' 
     ? `${window.location.origin}/tonconnect-manifest.json` 
     : '';
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+    }
+  }, []);
 
   return (
     <TonConnectUIProvider 
