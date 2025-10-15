@@ -55,7 +55,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         ]
       }}
       actionsConfiguration={{
-        twaReturnUrl: 'https://t.me/your_bot_name'
+        twaReturnUrl: 'https://t.me/apexgiftbot'
       }}
     >
       <div className="flex flex-col min-h-screen bg-background">

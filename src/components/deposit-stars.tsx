@@ -15,17 +15,25 @@ export function DepositStars() {
       const tg = window.Telegram.WebApp;
       tg.ready();
       
-      // The openInvoice method is failing, so we'll open a link to the user instead.
-      // This avoids the app crash and provides a path for the user to contact the recipient.
-      tg.openTelegramLink('https://t.me/nullprime');
-      
-      // We can provide a toast to inform the user what happened.
-      toast({
-        title: 'Redirecting to User',
-        description: 'You are being redirected to @nullprime to complete the transaction.',
+      // IMPORTANT: Replace 'YOUR_INVOICE_SLUG' with the real slug from BotFather.
+      // To use a real invoice, replace this with the slug from BotFather.
+      // For more info, see: https://core.telegram.org/bots/payments/stars#creating-invoices
+      tg.openInvoice('YOUR_INVOICE_SLUG', (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
+        setIsDepositing(false);
+        if (status === 'paid') {
+          toast({
+            title: 'Deposit Successful!',
+            description: 'Your stars have been added to your account.',
+          });
+          // Here you would typically update the user's star balance in your database.
+        } else if (status === 'failed') {
+          toast({
+            title: 'Deposit Failed',
+            description: 'Something went wrong. Please try again.',
+            variant: 'destructive',
+          });
+        }
       });
-      setIsDepositing(false);
-
     } else {
         toast({
             title: 'Telegram Only Feature',
