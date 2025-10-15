@@ -34,6 +34,7 @@ export default function Header() {
   useEffect(() => {
     // This effect runs only on the client.
     updateStars();
+    // Format stars only on the client to prevent hydration mismatch
     setFormattedStars(stars.toLocaleString());
 
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {

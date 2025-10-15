@@ -14,27 +14,35 @@ export default function LeaderboardPage() {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        // This ensures we are on the client side before doing anything with localStorage
+        // This effect runs only on the client side.
+        // It sets isClient to true, which triggers a re-render.
+        // The actual data loading happens in the second effect.
         setIsClient(true);
-
-        const loadLeaderboard = () => {
-            setLeaderboard(getLeaderboard());
-        };
-
-        // Load initial data
-        loadLeaderboard();
-        
-        // Setup event listeners to refresh data
-        window.addEventListener('focus', loadLeaderboard);
-        window.addEventListener('leaderboardUpdated', loadLeaderboard);
-
-        return () => {
-            window.removeEventListener('focus', loadLeaderboard);
-            window.removeEventListener('leaderboardUpdated', loadLeaderboard);
-        }
     }, []);
 
-    // Render nothing until the component has mounted on the client to avoid hydration mismatch
+    useEffect(() => {
+        // This effect runs only on the client after isClient becomes true.
+        if (isClient) {
+            const loadLeaderboard = () => {
+                setLeaderboard(getLeaderboard());
+            };
+
+            // Load initial data
+            loadLeaderboard();
+            
+            // Setup event listeners to refresh data
+            window.addEventListener('focus', loadLeaderboard);
+            window.addEventListener('leaderboardUpdated', loadLeaderboard);
+
+            return () => {
+                window.removeEventListener('focus', loadLeaderboard);
+                window.removeEventListener('leaderboardUpdated', loadLeaderboard);
+            }
+        }
+    }, [isClient]);
+
+    // Render nothing on the server and during the initial client render
+    // to prevent any hydration mismatch.
     if (!isClient) {
         return null;
     }
@@ -91,7 +99,7 @@ export default function LeaderboardPage() {
                       <span>{entry.user}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-lg">{entry.casesOpened}</TableCell>
+                  <TableCell className="text-right text-lg">{entry.casesOpened.toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
