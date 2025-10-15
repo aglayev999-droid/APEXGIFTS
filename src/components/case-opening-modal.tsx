@@ -64,7 +64,6 @@ const shuffle = (array: any[]) => {
 };
 
 function PrizeDisplay({ prize, className, showChance }: { prize: Prize, className?: string, showChance?: boolean }) {
-  const { t } = useTranslation();
   const isStarPrize = prize.description.includes('Stars');
   return (
     <div className={cn("bg-background/50 rounded-xl w-full h-full flex flex-col items-center justify-center p-2 text-center relative", className)}>
@@ -78,7 +77,7 @@ function PrizeDisplay({ prize, className, showChance }: { prize: Prize, classNam
             />
         </div>
         <div className="mt-2 text-center">
-          <p className="text-xs font-semibold truncate text-foreground">{t(prize.description)}</p>
+          <p className="text-xs font-semibold truncate text-foreground">{prize.description}</p>
           {prize.price && !isStarPrize && (
             <div className="flex items-center justify-center gap-1 text-xs text-yellow-400">
               <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={12} height={12} />

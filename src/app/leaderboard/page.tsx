@@ -15,14 +15,14 @@ export default function LeaderboardPage() {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        // This ensures the component is mounted on the client before doing client-side things
+        // This ensures the component has mounted on the client
         setIsClient(true);
     }, []);
 
     useEffect(() => {
         if (!isClient) return; // Don't run on server or before initial client render
 
-        // Load leaderboard from localStorage on component mount
+        // Now that we're on the client, we can safely access localStorage
         const loadLeaderboard = () => {
             setLeaderboard(getLeaderboard());
         };
@@ -40,6 +40,11 @@ export default function LeaderboardPage() {
             window.removeEventListener('leaderboardUpdated', loadLeaderboard);
         }
     }, [isClient]);
+
+  if (!isClient) {
+    // Render a loading state or nothing on the server to prevent hydration mismatch
+    return null; 
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

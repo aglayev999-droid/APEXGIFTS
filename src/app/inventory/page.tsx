@@ -125,7 +125,7 @@ export default function InventoryPage() {
                 />
               </CardContent>
               <CardHeader className="p-3">
-                <CardTitle className="text-sm font-semibold truncate">{t(item.name)}</CardTitle>
+                <CardTitle className="text-sm font-semibold truncate">{item.name}</CardTitle>
                 {item.image.price && (
                     <div className="flex items-center justify-start gap-1 text-xs text-yellow-400">
                       <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={12} height={12} />
