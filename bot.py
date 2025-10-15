@@ -21,16 +21,16 @@ if not TOKEN:
     exit()
 
 bot = telebot.TeleBot(TOKEN)
-server = Flask(__name__)
+app = Flask(__name__)
 
-@server.route('/' + TOKEN, methods=['POST'])
+@app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
     json_string = request.get_data().decode('utf-8')
     update = telebot.types.Update.de_json(json_string)
     bot.process_new_updates([update])
     return "!", 200
 
-@server.route("/")
+@app.route("/")
 def webhook():
     if APP_URL and TOKEN:
         bot.remove_webhook()
@@ -124,4 +124,4 @@ def got_payment(message):
 # as Render uses a WSGI server like Gunicorn.
 if __name__ == '__main__':
     logging.info("Starting Flask server for local development.")
-    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
