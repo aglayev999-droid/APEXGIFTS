@@ -2,9 +2,10 @@
 import { NextResponse } from 'next/server';
 import TelegramBot from 'node-telegram-bot-api';
 
-const token = process.env.BOT_TOKEN;
-const webAppUrl = process.env.APP_URL; 
-const paymentProviderToken = process.env.PAYMENT_PROVIDER_TOKEN;
+// TEMPORARY: Replace these with your actual values
+const token = "YOUR_BOT_TOKEN"; 
+const webAppUrl = "YOUR_APP_URL";
+const paymentProviderToken = "YOUR_PAYMENT_PROVIDER_TOKEN";
 
 // We are using webhook strategy, so polling is not needed.
 // The bot instance is created just to use the API methods.
@@ -12,7 +13,7 @@ const bot = new TelegramBot(token!);
 
 // This function handles the /start command.
 const handleStartCommand = async (chatId: number, text: string) => {
-    if (!webAppUrl) {
+    if (!webAppUrl || webAppUrl === 'YOUR_APP_URL') {
         console.error("APP_URL is not set!");
         return bot.sendMessage(chatId, "Sorry, the application is not configured correctly.");
     }
@@ -47,7 +48,7 @@ const handleStartCommand = async (chatId: number, text: string) => {
 
 // This function handles deposits
 const handleDeposit = async (chatId: number, amount: number | null) => {
-    if (!paymentProviderToken) {
+    if (!paymentProviderToken || paymentProviderToken === 'YOUR_PAYMENT_PROVIDER_TOKEN') {
         console.error("PAYMENT_PROVIDER_TOKEN is not set!");
         return bot.sendMessage(chatId, "Sorry, payments are not configured correctly.");
     }
@@ -118,5 +119,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: 'Internal server error' }, { status: 500 });
   }
 }
-
-    
