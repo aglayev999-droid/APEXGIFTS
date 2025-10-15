@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react';
 import { ApexLogo } from '@/components/icons/apex-logo';
 import { StarIcon } from '@/components/icons/star-icon';
 import { userProfile } from '@/lib/data';
-import { Button } from '@/components/ui/button';
-import { Wallet } from 'lucide-react';
+import { WalletConnectDialog } from '@/components/wallet-connect-dialog';
 
 export default function Header() {
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [formattedStars, setFormattedStars] = useState<string | number>(userProfile.stars);
 
   useEffect(() => {
+    // This now correctly runs only on the client, avoiding the hydration error.
     setFormattedStars(userProfile.stars.toLocaleString());
   }, []);
 
@@ -27,15 +26,7 @@ export default function Header() {
             <StarIcon className="w-5 h-5 text-yellow-400" />
             <span className="font-bold text-lg text-foreground">{formattedStars}</span>
           </div>
-          <Button
-            size="sm"
-            variant={isWalletConnected ? 'secondary' : 'outline'}
-            className="border-primary/50 text-primary"
-            onClick={() => setIsWalletConnected(!isWalletConnected)}
-          >
-            <Wallet className="mr-2 h-4 w-4" />
-            {isWalletConnected ? 'Connected' : 'Connect'}
-          </Button>
+          <WalletConnectDialog />
         </div>
       </div>
     </header>
