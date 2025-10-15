@@ -1,34 +1,96 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ApexLogo } from '@/components/icons/apex-logo';
 import { StarIcon } from '@/components/icons/star-icon';
-import { userProfile } from '@/lib/data';
+import { userProfile as defaultUserProfile } from '@/lib/data';
 import { WalletConnectDialog } from '@/components/wallet-connect-dialog';
 import { useTonWallet } from '@tonconnect/ui-react';
 import { Button } from '../ui/button';
 import { Wallet } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '../ui/skeleton';
+
+type TelegramUser = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+};
 
 export default function Header() {
-  const [formattedStars, setFormattedStars] = useState<string | number>(userProfile.stars);
+  const [user, setUser] = useState<TelegramUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [formattedStars, setFormattedStars] = useState<string | number>(defaultUserProfile.stars);
   const wallet = useTonWallet();
 
   useEffect(() => {
     // This now correctly runs only on the client, avoiding the hydration error.
-    setFormattedStars(userProfile.stars.toLocaleString());
+    setFormattedStars(defaultUserProfile.stars.toLocaleString());
+
+    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      
+      const tgUser = tg.initDataUnsafe?.user;
+
+      if (tgUser) {
+        setUser({
+          id: tgUser.id,
+          first_name: tgUser.first_name,
+          last_name: tgUser.last_name,
+          username: tgUser.username,
+          photo_url: tgUser.photo_url
+        });
+      } else {
+        // Fallback for when not in Telegram environment
+        setUser({
+            id: 12345,
+            first_name: defaultUserProfile.name,
+            username: defaultUserProfile.telegramId.replace('@', ''),
+            photo_url: defaultUserProfile.avatarUrl,
+        })
+      }
+      setLoading(false);
+    } else {
+        // Fallback for development
+        setUser({
+            id: 12345,
+            first_name: defaultUserProfile.name,
+            username: defaultUserProfile.telegramId.replace('@', ''),
+            photo_url: defaultUserProfile.avatarUrl,
+        })
+        setLoading(false);
+    }
   }, []);
 
   const formatAddress = (address: string) => {
     if (!address) return '';
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   }
+  
+  const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
+  const avatarUrl = user?.photo_url || defaultUserProfile.avatarUrl;
+  const avatarFallback = displayName.charAt(0).toUpperCase();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-background/80 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <ApexLogo className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold font-headline text-foreground">Apex Gift</span>
+        <div className="flex items-center gap-3">
+          {loading ? (
+             <>
+                <Skeleton className="h-9 w-9 rounded-full" />
+                <Skeleton className="h-5 w-24" />
+             </>
+          ) : (
+            <>
+              <Avatar className="w-9 h-9 border-2 border-primary">
+                <AvatarImage src={avatarUrl} alt={displayName} />
+                <AvatarFallback>{avatarFallback}</AvatarFallback>
+              </Avatar>
+              <span className="text-lg font-bold text-foreground">{displayName}</span>
+            </>
+          )}
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-primary/30">
