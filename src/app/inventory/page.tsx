@@ -4,10 +4,11 @@ import Image from 'next/image';
 import { inventory, removeInventoryItem, userProfile } from '@/lib/data';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, PiggyBank } from 'lucide-react';
+import { Gift, PiggyBank, ShoppingCart } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 export default function InventoryPage() {
   const { toast } = useToast();
@@ -32,12 +33,62 @@ export default function InventoryPage() {
       });
   }
 
+  const handleSellAll = () => {
+    const totalValue = inventory.reduce((sum, item) => sum + (item.image.price || 0), 0);
+
+    if (totalValue === 0) {
+      toast({
+        title: 'Nothing to sell',
+        description: 'You have no sellable items in your inventory.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    userProfile.stars += totalValue;
+    inventory.length = 0; // Clear the inventory array
+
+    toast({
+      title: 'All Items Sold!',
+      description: `You have received ${totalValue.toLocaleString()} stars.`,
+    });
+
+    setForceRender(Math.random());
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold font-headline tracking-tight text-primary">My Collection</h1>
         <p className="text-muted-foreground mt-2">All the awesome NFTs you've collected.</p>
       </div>
+
+      {inventory.length > 0 && (
+          <div className="mb-6 flex justify-end">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                  Sell All
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will sell all items in your inventory. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSellAll} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground">
+                    Confirm & Sell All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+      )}
 
       {inventory.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
