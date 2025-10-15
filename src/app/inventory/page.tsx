@@ -54,9 +54,9 @@ export default function InventoryPage() {
       setForceRender(Math.random());
   }
 
-  const handleSellAll = () => {
-    const totalValue = inventory.reduce((sum, item) => sum + (item.image.price || 0), 0);
+  const totalValue = inventory.reduce((sum, item) => sum + (item.image.price || 0), 0);
 
+  const handleSellAll = () => {
     if (totalValue === 0) {
       toast({
         title: t('Nothing to sell'),
@@ -88,9 +88,15 @@ export default function InventoryPage() {
           <div className="mb-6 flex justify-end">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive">
+                <Button variant="destructive" disabled={totalValue === 0}>
                   <ShoppingCart className="mr-2 h-4 w-4" />
                   {t('Sell All')}
+                  {totalValue > 0 && (
+                    <div className="flex items-center gap-1 ml-2 border-l border-destructive-foreground/30 pl-2">
+                        <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={16} height={16} />
+                        <span>{totalValue.toLocaleString()}</span>
+                    </div>
+                  )}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
