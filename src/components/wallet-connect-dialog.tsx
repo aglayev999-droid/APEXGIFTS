@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -9,13 +10,13 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Wallet, HelpCircle, Send } from 'lucide-react';
+import { Wallet, HelpCircle, Send, Loader2 } from 'lucide-react';
 import { TonkeeperIcon } from './icons/tonkeeper-icon';
 import { MyTonWalletIcon } from './icons/mytonwallet-icon';
 import { TonhubIcon } from './icons/tonhub-icon';
 import { TonConnectIcon } from './icons/ton-connect-icon';
-import { useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
-import { WALLET_ID } from '@tonconnect/ui-react';
+import { useTonConnectUI } from '@tonconnect/ui-react';
+import type { WALLET_ID } from '@tonconnect/ui-react';
 
 
 const walletProviders = [
@@ -25,19 +26,24 @@ const walletProviders = [
 ];
 
 export function WalletConnectDialog() {
-  const { open } = useTonConnectModal();
   const [tonConnectUI] = useTonConnectUI();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
-  const handleConnect = (walletId: WALLET_ID) => {
-    tonConnectUI.connectWallet(walletId);
+  const handleConnect = async (walletId: WALLET_ID | 'telegram-wallet') => {
+    try {
+        setIsConnecting(true);
+        await tonConnectUI.connectWallet(walletId);
+        setIsOpen(false); // Close dialog on successful connection attempt
+    } catch (error) {
+        console.error('Failed to connect wallet:', error);
+    } finally {
+        setIsConnecting(false);
+    }
   };
 
-  const handleTelegramConnect = () => {
-    tonConnectUI.connectWallet('telegram-wallet');
-  }
-
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
           size="sm"
@@ -56,18 +62,23 @@ export function WalletConnectDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="p-6 pt-2 flex flex-col gap-4">
-          <Button size="lg" className="w-full h-12 bg-primary/90 hover:bg-primary text-primary-foreground" onClick={handleTelegramConnect}>
-            Connect Wallet in Telegram
-            <Send className="ml-2 h-4 w-4" />
+          <Button size="lg" className="w-full h-12 bg-primary/90 hover:bg-primary text-primary-foreground" onClick={() => handleConnect('telegram-wallet')} disabled={isConnecting}>
+            {isConnecting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="ml-2 h-4 w-4" />}
+            {isConnecting ? 'Connecting...' : 'Connect Wallet in Telegram'}
           </Button>
 
           <div className="text-center text-sm text-muted-foreground">Choose other application</div>
 
           <div className="grid grid-cols-3 gap-4 text-center">
             {walletProviders.map((wallet) => (
-              <div key={wallet.name} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => handleConnect(wallet.id)}>
-                <div className="p-2 rounded-xl bg-background/50 group-hover:bg-accent transition-colors">
+              <div key={wallet.name} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => !isConnecting && handleConnect(wallet.id)}>
+                <div className="p-2 rounded-xl bg-background/50 group-hover:bg-accent transition-colors relative">
                   {wallet.icon}
+                  {isConnecting && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-xl">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                    </div>
+                  )}
                 </div>
                 <span className="text-xs font-medium">{wallet.name}</span>
               </div>
