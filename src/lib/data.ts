@@ -1,6 +1,6 @@
 
 import placeholderData from './placeholder-images.json';
-import type { ImagePlaceholder, Prize, InventoryItem } from './types';
+import type { ImagePlaceholder, Prize, InventoryItem, LeaderboardEntry } from './types';
 
 const images: ImagePlaceholder[] = placeholderData.placeholderImages;
 const findImage = (id: string) => {
@@ -65,7 +65,7 @@ export const cases = [
 export let inventory: InventoryItem[] = [];
 
 export const addInventoryItem = (item: InventoryItem) => {
-    inventory.push(item);
+    inventory.unshift(item);
 };
 
 export const removeInventoryItem = (itemId: string) => {
@@ -74,4 +74,27 @@ export const removeInventoryItem = (itemId: string) => {
 
 export const allPrizes = [...new Set([...freeCasePrizes, ...floorCasePrizes, ...labubuCasePrizes, ...apexCasePrizes])];
 
-export const leaderboard: { rank: number; user: string; avatar: string; casesOpened: number }[] = [];
+export let leaderboard: LeaderboardEntry[] = [];
+
+export const updateLeaderboard = (user: { name: string; avatar: string }, casesOpened: number) => {
+  const existingUserIndex = leaderboard.findIndex(entry => entry.user === user.name);
+
+  if (existingUserIndex > -1) {
+    leaderboard[existingUserIndex].casesOpened += casesOpened;
+  } else {
+    leaderboard.push({
+      rank: 0,
+      user: user.name,
+      avatar: user.avatar,
+      casesOpened: casesOpened,
+    });
+  }
+
+  // Sort by cases opened (desc)
+  leaderboard.sort((a, b) => b.casesOpened - a.casesOpened);
+
+  // Update ranks
+  leaderboard.forEach((entry, index) => {
+    entry.rank = index + 1;
+  });
+};

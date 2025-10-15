@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -18,7 +18,7 @@ import type { Case, Prize } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Gift, Loader2, Percent } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { addInventoryItem, userProfile } from '@/lib/data';
+import { addInventoryItem, userProfile, updateLeaderboard } from '@/lib/data';
 import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 import { Label } from './ui/label';
 import { ScrollArea } from './ui/scroll-area';
@@ -27,6 +27,14 @@ const REVEAL_DURATION_MS = 5000;
 const REEL_ITEM_WIDTH = 128; // 8rem in pixels (w-32)
 const MULTIPLIERS = [1, 3, 5, 10] as const;
 type Multiplier = typeof MULTIPLIERS[number];
+
+type TelegramUser = {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+};
 
 // Weighted random selection based on chance
 const selectPrize = (prizes: Prize[]): Prize => {
@@ -96,23 +104,39 @@ interface Reel {
 export function CaseOpeningModal({
   children,
   caseItem,
+  onCaseOpened,
+  isDisabled = false
 }: {
   children: ReactNode;
   caseItem: Case;
+  onCaseOpened?: () => void;
+  isDisabled?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrizes, setWonPrizes] = useState<Prize[]>([]);
   const [reels, setReels] = useState<Reel[]>([]);
   const [multiplier, setMultiplier] = useState<Multiplier>(1);
+  const [telegramUser, setTelegramUser] = useState<TelegramUser | null>(null);
   
   const router = useRouter();
   const { toast } = useToast();
   const [_, setForceRender] = useState(0);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+        const tg = window.Telegram.WebApp;
+        if (tg.initDataUnsafe?.user) {
+            setTelegramUser(tg.initDataUnsafe.user);
+        }
+    }
+  }, []);
+
   const totalCost = caseItem.cost * multiplier;
 
   const handleOpenCase = () => {
+    if (isDisabled) return;
+
     if (userProfile.stars < totalCost && caseItem.cost > 0) {
       toast({
         title: 'Not enough stars!',
@@ -127,8 +151,18 @@ export function CaseOpeningModal({
     
     if (caseItem.cost > 0) {
         userProfile.stars -= totalCost;
-        setForceRender(Math.random());
     }
+
+    if (telegramUser) {
+        const currentUser = {
+            name: `${telegramUser.first_name} ${telegramUser.last_name || ''}`.trim(),
+            avatar: telegramUser.photo_url || ''
+        };
+        updateLeaderboard(currentUser, multiplier);
+    }
+    
+    setForceRender(Math.random());
+    onCaseOpened?.();
 
     const newReels: Reel[] = [];
     const finalPrizes: Prize[] = [];
@@ -139,73 +173,46 @@ export function CaseOpeningModal({
     }
 
     // Then, construct the reels with the guaranteed prize
-    for (let i = 0; i < multiplier; i++) {
-        const winningPrize = finalPrizes[i];
+    finalPrizes.forEach((winningPrize, i) => {
         const prizePool = caseItem.prizes;
+        const reelItems = [...Array(50)].flatMap(() => shuffle([...prizePool]));
         
-        // Create a long reel with shuffled prizes
-        const shuffledPool = shuffle([...prizePool, ...prizePool, ...prizePool]);
-        const reelItems = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
-
-        // Find a suitable position for the winning prize in the last 30% of the reel.
-        let winningIndex = -1;
-        const searchStart = Math.floor(reelItems.length * 0.7);
-        for (let j = searchStart; j < reelItems.length - 5; j++) {
-            if (reelItems[j].id === winningPrize.id) {
-                winningIndex = j;
-                break;
-            }
-        }
-        
-        // If the prize wasn't found in the target area, place it there.
-        if (winningIndex === -1) {
-            winningIndex = searchStart + Math.floor(Math.random() * 5); // Randomly place it near the start of the target zone
-            reelItems[winningIndex] = winningPrize;
-        }
+        let winningIndex = reelItems.length - Math.floor(Math.random() * 10) - 5;
+        reelItems[winningIndex] = winningPrize;
 
         newReels.push({
             id: i,
             items: reelItems,
-            offset: 0, // Initial offset
+            offset: 0,
             winningPrize: reelItems[winningIndex],
         });
-    }
-
+    });
 
     setReels(newReels);
 
     // Use requestAnimationFrame to ensure the initial state is rendered before the transition starts
     requestAnimationFrame(() => {
         setReels(prevReels => prevReels.map((reel) => {
-             const winningItem = reel.winningPrize;
-             let winningIndex = -1;
+            const winningItem = reel.winningPrize;
+            let winningIndex = reel.items.lastIndexOf(winningItem);
 
-             // Find the exact index of the predetermined winning prize instance.
-             const searchStart = Math.floor(reel.items.length * 0.7);
-             for (let j = searchStart; j < reel.items.length - 5; j++) {
-                if (reel.items[j].id === winningItem.id) {
-                    winningIndex = j;
-                    break;
-                }
-             }
-
-             if (winningIndex === -1) { 
-                winningIndex = reel.items.length - 10;
+            if (winningIndex < reel.items.length - 20) {
+                winningIndex = reel.items.length - Math.floor(Math.random() * 10) - 5;
                 reel.items[winningIndex] = winningItem;
-             }
-
-            // Calculate the target offset to center the winning prize
-            const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6); // Randomness for visual variety
+            }
+            
+            const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6);
             const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2) + jitter;
-            return { ...reel, offset: targetOffset };
+            return { ...reel, offset: targetOffset, winningPrize: reel.items[winningIndex] };
         }));
     });
 
     setTimeout(() => {
       setIsSpinning(false);
-      setWonPrizes(finalPrizes);
+      const actualWonPrizes = newReels.map(reel => reel.winningPrize);
+      setWonPrizes(actualWonPrizes);
       
-      finalPrizes.forEach(prize => {
+      actualWonPrizes.forEach(prize => {
           if (!prize.description.includes('Stars')) {
             addInventoryItem({
                 id: `${prize.id}-${Date.now()}-${Math.random()}`,
@@ -213,7 +220,7 @@ export function CaseOpeningModal({
                 image: prize,
             });
           } else {
-            const starAmount = parseInt(prize.description.split(' ')[0]);
+            const starAmount = parseInt(prize.description.replace(/[^0-9]/g, ''));
             if (!isNaN(starAmount)) {
                 userProfile.stars += starAmount;
             }
@@ -225,14 +232,24 @@ export function CaseOpeningModal({
   };
 
   const reset = () => {
-    setIsOpen(false);
-    setWonPrizes([]);
-    setIsSpinning(false);
-    setReels([]);
-    setMultiplier(1);
+    // For free case, we don't want to re-open the dialog automatically.
+    // For paid cases, we can.
+    if(caseItem.cost > 0) {
+      setWonPrizes([]);
+      setIsSpinning(false);
+      setReels([]);
+      setMultiplier(1);
+    } else {
+      setIsOpen(false);
+      setWonPrizes([]);
+      setIsSpinning(false);
+      setReels([]);
+      setMultiplier(1);
+    }
   }
 
   const handleGoToInventory = () => {
+    setIsOpen(false);
     reset();
     router.push('/inventory');
   }
@@ -287,11 +304,11 @@ export function CaseOpeningModal({
             size="lg" 
             className="w-full h-12 text-lg" 
             onClick={handleOpenCase}
-            disabled={isSpinning}
+            disabled={isSpinning || isDisabled}
           >
             {isSpinning ? <Loader2 className="w-6 h-6 animate-spin" /> : (
               <div className='flex items-center justify-center gap-2'>
-                <span>{caseItem.cost > 0 ? `Spin for ${totalCost.toLocaleString()}`: 'Spin for Free'}</span>
+                <span>{caseItem.cost > 0 ? `Spin for ${totalCost.toLocaleString()}`: (isDisabled ? 'Come back later' : 'Spin for Free')}</span>
                 {caseItem.cost > 0 && <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={20} height={20} />}
               </div>
             )}
@@ -303,13 +320,15 @@ export function CaseOpeningModal({
                 <span>Prizes Inside</span>
               </AccordionTrigger>
               <AccordionContent className="p-4 bg-background/80 rounded-b-lg">
-                <div className="grid grid-cols-4 gap-2">
-                  {caseItem.prizes.map(prize => (
-                    <div key={prize.id} className="p-1 bg-card rounded-md aspect-square">
-                        <PrizeDisplay prize={prize} showChance={true}/>
+                <ScrollArea className="h-48">
+                    <div className="grid grid-cols-4 gap-2">
+                    {caseItem.prizes.map(prize => (
+                        <div key={prize.id} className="p-1 bg-card rounded-md aspect-square">
+                            <PrizeDisplay prize={prize} showChance={true}/>
+                        </div>
+                    ))}
                     </div>
-                  ))}
-                </div>
+                </ScrollArea>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -380,7 +399,7 @@ export function CaseOpeningModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => { if (!open) reset(); setIsOpen(open); }}>
-      <DialogTrigger asChild onClick={() => setIsOpen(true)}>
+      <DialogTrigger asChild onClick={() => setIsOpen(true)} disabled={isDisabled}>
         {children}
       </DialogTrigger>
       <DialogContent className="w-full h-full max-h-full sm:max-w-full sm:h-full p-0 bg-transparent border-none flex flex-col">
@@ -390,4 +409,8 @@ export function CaseOpeningModal({
   );
 }
 
-    
+declare global {
+    interface Window {
+        Telegram: any;
+    }
+}

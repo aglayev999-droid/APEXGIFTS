@@ -7,6 +7,9 @@ import { CaseOpeningModal } from '@/components/case-opening-modal';
 import { FreeCaseTimer } from '@/components/free-case-timer';
 
 export default function Home() {
+  const freeCase = cases.find(c => c.cost === 0);
+  const paidCases = cases.filter(c => c.cost > 0);
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* This heading is now hidden, per the design */}
@@ -16,7 +19,26 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        {cases.map((caseItem) => (
+        {freeCase && (
+            <Card key={freeCase.id} className="bg-card border-border overflow-hidden group rounded-xl">
+                 <CardContent className="p-3 text-center relative flex flex-col items-center justify-between h-full">
+                    <div className="relative w-full aspect-square max-w-xs mx-auto">
+                        <Image
+                            src={freeCase.image.imageUrl}
+                            alt={freeCase.name}
+                            fill
+                            className="object-contain group-hover:scale-110 transition-transform duration-500"
+                            data-ai-hint={freeCase.image.imageHint}
+                        />
+                    </div>
+                    <div className="w-full mt-3">
+                        <h2 className="text-md font-semibold text-foreground truncate">{freeCase.name}</h2>
+                        <FreeCaseTimer />
+                    </div>
+                 </CardContent>
+            </Card>
+        )}
+        {paidCases.map((caseItem) => (
           <Card key={caseItem.id} className="bg-card border-border overflow-hidden group rounded-xl">
             <CardContent className="p-3 text-center relative flex flex-col items-center justify-between h-full">
               <div className="relative w-full aspect-square max-w-xs mx-auto">
@@ -30,16 +52,12 @@ export default function Home() {
               </div>
               <div className="w-full mt-3">
                 <h2 className="text-md font-semibold text-foreground truncate">{caseItem.name}</h2>
-                {caseItem.cost > 0 ? (
                   <CaseOpeningModal caseItem={caseItem}>
                     <div className="w-full bg-primary text-primary-foreground h-10 rounded-lg flex items-center justify-center gap-2 text-md font-bold cursor-pointer transition-all duration-300 group-hover:bg-primary/90 mt-2">
                        <span>{caseItem.cost}</span>
                        <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={20} height={20} />
                     </div>
                   </CaseOpeningModal>
-                ) : (
-                  <FreeCaseTimer />
-                )}
               </div>
             </CardContent>
           </Card>

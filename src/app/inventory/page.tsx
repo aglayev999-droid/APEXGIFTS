@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { inventory, removeInventoryItem, userProfile } from '@/lib/data';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, PiggyBank, ShoppingCart } from 'lucide-react';
+import { PiggyBank, ShoppingCart, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,11 +26,30 @@ export default function InventoryPage() {
     setForceRender(Math.random()); 
   };
   
-  const handleGiftItem = () => {
+  const handleWithdrawItem = (itemName: string) => {
+      if (userProfile.stars < 25) {
+          toast({
+              title: 'Not enough stars',
+              description: 'You need 25 stars to withdraw an item.',
+              variant: 'destructive',
+          });
+          return;
+      }
+
+      userProfile.stars -= 25;
+
+      const text = `Hi, I would like to withdraw my item: ${itemName}`;
+      const telegramUrl = `https://t.me/nullprime?text=${encodeURIComponent(text)}`;
+
+      if (typeof window !== 'undefined') {
+          window.open(telegramUrl, '_blank');
+      }
+
       toast({
-          title: 'Coming Soon!',
-          description: 'Gifting functionality will be available in a future update.',
+          title: 'Withdrawal Initiated',
+          description: 'You have been charged 25 stars. Please complete the process in Telegram.',
       });
+      setForceRender(Math.random());
   }
 
   const handleSellAll = () => {
@@ -113,9 +132,9 @@ export default function InventoryPage() {
                 )}
               </CardHeader>
               <CardFooter className="p-3 pt-0 mt-auto grid grid-cols-2 gap-2">
-                <Button size="sm" variant="outline" className="w-full" onClick={handleGiftItem}>
-                  <Gift className="mr-2 h-4 w-4" />
-                  Gift
+                <Button size="sm" variant="outline" className="w-full" onClick={() => handleWithdrawItem(item.name)}>
+                  <Send className="mr-2 h-4 w-4" />
+                  Withdraw
                 </Button>
                 <Button
                   size="sm"

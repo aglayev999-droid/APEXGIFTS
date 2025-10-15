@@ -1,11 +1,24 @@
+'use client';
 import { leaderboard } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 
 export default function LeaderboardPage() {
+    const [_, setForceRender] = useState(0);
+
+    // This effect will re-run when the page is focused, providing a simple way to refresh data
+    useEffect(() => {
+        const handleFocus = () => {
+            setForceRender(Math.random());
+        };
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, []);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="text-center mb-8">
@@ -21,6 +34,7 @@ export default function LeaderboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
+            {leaderboard.length > 0 ? (
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-primary/20">
@@ -62,6 +76,12 @@ export default function LeaderboardPage() {
               ))}
             </TableBody>
           </Table>
+           ) : (
+            <div className="text-center py-10">
+                <p className="text-muted-foreground">The leaderboard is empty.</p>
+                <p className="text-muted-foreground">Open some cases to get on the board!</p>
+            </div>
+           )}
         </CardContent>
       </Card>
     </div>
