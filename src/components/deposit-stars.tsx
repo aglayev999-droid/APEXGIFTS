@@ -16,7 +16,7 @@ export function DepositStars() {
   const [isDepositing, setIsDepositing] = useState(false);
   const { toast } = useToast();
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     setIsDepositing(true);
     
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
@@ -25,17 +25,18 @@ export function DepositStars() {
 
       const invoiceSlug = generateInvoiceSlug();
       
-      // This function opens the payment interface using Telegram Stars
-      tg.showInvoice({ slug: invoiceSlug }, (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
-        setIsDepositing(false);
-        if (status === 'paid') {
+      try {
+        // The showInvoice method returns a promise, it does not take a callback.
+        const result = await tg.showInvoice({ slug: invoiceSlug });
+
+        if (result.status === 'paid') {
           toast({
             title: t('Deposit Successful!'),
             description: t('Your stars have been added to your account.'),
           });
           // IMPORTANT: You need to verify the payment on your backend
           // and credit the stars to the user's account.
-        } else if (status === 'failed') {
+        } else if (result.status === 'failed') {
           toast({
             title: t('Deposit Failed'),
             description: t('Something went wrong. Please try again.'),
@@ -43,7 +44,16 @@ export function DepositStars() {
           });
         }
         // Handle 'cancelled' and 'pending' statuses if needed
-      });
+      } catch (error) {
+        console.error('Invoice error:', error);
+        toast({
+          title: t('Deposit Failed'),
+          description: t('An error occurred while processing the payment.'),
+          variant: 'destructive',
+        });
+      } finally {
+        setIsDepositing(false);
+      }
     } else {
         toast({
             title: t('Telegram Only Feature'),
