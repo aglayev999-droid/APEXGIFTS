@@ -11,14 +11,25 @@ export function DepositStars() {
 
   const handleDeposit = () => {
     setIsDepositing(true);
+    
+    const invoiceSlug = 'YOUR_INVOICE_SLUG';
+
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+      if (invoiceSlug === 'YOUR_INVOICE_SLUG') {
+        toast({
+          title: 'Configuration Needed',
+          description: 'Please replace "YOUR_INVOICE_SLUG" in src/components/deposit-stars.tsx with a real invoice slug from BotFather.',
+          variant: 'destructive',
+          duration: 5000,
+        });
+        setIsDepositing(false);
+        return;
+      }
+      
       const tg = window.Telegram.WebApp;
       tg.ready();
       
-      // IMPORTANT: Replace 'YOUR_INVOICE_SLUG' with the real slug from BotFather.
-      // To use a real invoice, replace this with the slug from BotFather.
-      // For more info, see: https://core.telegram.org/bots/payments/stars#creating-invoices
-      tg.openInvoice('YOUR_INVOICE_SLUG', (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
+      tg.openInvoice(invoiceSlug, (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
         setIsDepositing(false);
         if (status === 'paid') {
           toast({
