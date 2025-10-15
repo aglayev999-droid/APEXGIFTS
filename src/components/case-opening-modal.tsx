@@ -61,7 +61,7 @@ export function CaseOpeningModal({
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<ImagePlaceholder | null>(null);
   const [reelItems, setReelItems] = useState<ImagePlaceholder[]>([]);
-  const [reelSpinTo, setReelSpinTo] = useState(0);
+  const [reelStyle, setReelStyle] = useState<React.CSSProperties>({});
   const router = useRouter();
   const { toast } = useToast();
 
@@ -78,7 +78,6 @@ export function CaseOpeningModal({
     setWonPrize(null);
     setIsSpinning(true);
 
-    // Simulate star deduction
     if (caseItem.cost > 0) {
         userProfile.stars -= caseItem.cost;
     }
@@ -91,28 +90,29 @@ export function CaseOpeningModal({
     const prizeIndex = Math.floor(Math.random() * caseItem.prizes.length);
     const finalPrize = caseItem.prizes[prizeIndex];
     
-    // Target an item in the 8th segment of the reel
     const targetIndex = extendedReel.length - caseItem.prizes.length * 2 + prizeIndex;
     
-    // Calculate final position
-    // Center of screen - half width of item + random offset within item
     const finalPosition = -(targetIndex * REEL_ITEM_WIDTH - (window.innerWidth / 2) + (REEL_ITEM_WIDTH / 2) - (Math.random() * 80 - 40));
     
-    setReelSpinTo(finalPosition);
+    // THE FIX IS HERE: Using requestAnimationFrame to ensure the animation triggers correctly.
+    requestAnimationFrame(() => {
+        setReelStyle({
+            '--reel-spin-to': `${finalPosition}px`,
+            animation: `reel-spin ${REEL_SPIN_DURATION_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards`,
+        });
+    });
     
     setTimeout(() => {
       setIsSpinning(false);
       setWonPrize(finalPrize);
       
-      // THIS IS THE NEW LOGIC TO ADD THE ITEM
       if (!finalPrize.description.includes('Stars')) {
         addInventoryItem({
-            id: `${finalPrize.id}-${Date.now()}`, // Create a unique ID for the inventory item
+            id: `${finalPrize.id}-${Date.now()}`,
             name: finalPrize.description,
             image: finalPrize,
         });
       } else {
-        // Handle star prize logic
         const starAmount = parseInt(finalPrize.description.split(' ')[0]);
         if (!isNaN(starAmount)) {
             userProfile.stars += starAmount;
@@ -126,6 +126,7 @@ export function CaseOpeningModal({
     setIsOpen(false);
     setWonPrize(null);
     setIsSpinning(false);
+    setReelStyle({});
   }
 
   const handleGoToInventory = () => {
@@ -196,13 +197,8 @@ export function CaseOpeningModal({
 
       <div className='relative w-full h-40 flex items-center'>
         <div
-            className={cn('flex items-center will-change-transform', isSpinning && 'animate-reel-spin')}
-            style={{
-                '--reel-spin-to': `${reelSpinTo}px`,
-                animationDuration: `${REEL_SPIN_DURATION_MS}ms`,
-                animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
-                animationFillMode: 'forwards'
-            } as React.CSSProperties}
+            className='flex items-center will-change-transform'
+            style={reelStyle}
         >
             {reelItems.map((prize, index) => (
               <div key={index} className="flex-shrink-0 w-36 h-36 p-2">
@@ -245,3 +241,5 @@ export function CaseOpeningModal({
     </Dialog>
   );
 }
+
+    
