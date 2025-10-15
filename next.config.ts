@@ -30,6 +30,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/tonconnect-manifest.json',
+        destination: '/tonconnect-manifest.json',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
