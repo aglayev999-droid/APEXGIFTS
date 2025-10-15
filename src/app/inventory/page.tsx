@@ -1,3 +1,5 @@
+
+'use client';
 import Image from 'next/image';
 import { inventory } from '@/lib/data';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';

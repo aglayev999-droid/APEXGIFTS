@@ -3,6 +3,7 @@
 
 import { useState, type ReactNode } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import type { Case, ImagePlaceholder } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Gift } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { addInventoryItem, userProfile } from '@/lib/data';
 
 const REEL_ITEM_WIDTH = 144; // w-36
 const REEL_SPIN_DURATION_MS = 5000;
@@ -51,22 +53,20 @@ function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className
 export function CaseOpeningModal({
   children,
   caseItem,
-  userStars,
 }: {
   children: ReactNode;
   caseItem: Case;
-  userStars: number;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<ImagePlaceholder | null>(null);
   const [reelItems, setReelItems] = useState<ImagePlaceholder[]>([]);
   const [reelSpinTo, setReelSpinTo] = useState(0);
-
+  const router = useRouter();
   const { toast } = useToast();
 
   const handleOpenCase = () => {
-    if (userStars < caseItem.cost && caseItem.cost > 0) {
+    if (userProfile.stars < caseItem.cost && caseItem.cost > 0) {
       toast({
         title: 'Not enough stars!',
         description: `You need ${caseItem.cost} stars to open this case.`,
@@ -77,6 +77,11 @@ export function CaseOpeningModal({
     
     setWonPrize(null);
     setIsSpinning(true);
+
+    // Simulate star deduction
+    if (caseItem.cost > 0) {
+        userProfile.stars -= caseItem.cost;
+    }
 
     const extendedReel = Array(10)
       .fill(null)
@@ -98,6 +103,22 @@ export function CaseOpeningModal({
     setTimeout(() => {
       setIsSpinning(false);
       setWonPrize(finalPrize);
+      
+      // THIS IS THE NEW LOGIC TO ADD THE ITEM
+      if (!finalPrize.description.includes('Stars')) {
+        addInventoryItem({
+            id: `${finalPrize.id}-${Date.now()}`, // Create a unique ID for the inventory item
+            name: finalPrize.description,
+            image: finalPrize,
+        });
+      } else {
+        // Handle star prize logic
+        const starAmount = parseInt(finalPrize.description.split(' ')[0]);
+        if (!isNaN(starAmount)) {
+            userProfile.stars += starAmount;
+        }
+      }
+
     }, REEL_SPIN_DURATION_MS);
   };
 
@@ -105,6 +126,11 @@ export function CaseOpeningModal({
     setIsOpen(false);
     setWonPrize(null);
     setIsSpinning(false);
+  }
+
+  const handleGoToInventory = () => {
+    reset();
+    router.push('/inventory');
   }
 
   const renderInitialView = () => (
@@ -131,6 +157,7 @@ export function CaseOpeningModal({
             size="lg" 
             className="w-full h-12 text-lg" 
             onClick={handleOpenCase}
+            disabled={isSpinning}
           >
               <div className='flex items-center justify-center gap-2'>
                 <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost}`: 'Spin for Free'}</span>
@@ -172,7 +199,9 @@ export function CaseOpeningModal({
             className={cn('flex items-center will-change-transform', isSpinning && 'animate-reel-spin')}
             style={{
                 '--reel-spin-to': `${reelSpinTo}px`,
-                animationDuration: `${REEL_SPIN_DURATION_MS}ms`
+                animationDuration: `${REEL_SPIN_DURATION_MS}ms`,
+                animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
+                animationFillMode: 'forwards'
             } as React.CSSProperties}
         >
             {reelItems.map((prize, index) => (
@@ -192,12 +221,11 @@ export function CaseOpeningModal({
              <PrizeDisplay prize={wonPrize!} />
         </div>
         <h3 className="text-xl font-bold font-headline">{wonPrize!.description}</h3>
-        <p className="text-muted-foreground mb-6">has been added to your inventory.</p>
+        <p className="text-muted-foreground mb-6">
+            {wonPrize!.description.includes('Stars') ? 'has been added to your balance.' : 'has been added to your inventory.'}
+        </p>
         <div className="flex flex-col gap-2 w-full">
-            <Button onClick={() => {
-                // In a real app, you would navigate to inventory
-                reset();
-            }}>
+            <Button onClick={handleGoToInventory}>
                 <Gift className="mr-2 h-4 w-4" />
                 Go to Inventory
             </Button>
