@@ -11,18 +11,16 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Case, ImagePlaceholder } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { Gift } from 'lucide-react';
+import { Gift, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addInventoryItem, userProfile } from '@/lib/data';
 
-const REEL_ITEM_WIDTH = 144; // w-36
-const REEL_SPIN_DURATION_MS = 5000;
+const REVEAL_DURATION_MS = 3000;
 
 function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className?: string }) {
   const isStarPrize = prize.description.includes('Stars');
@@ -60,8 +58,6 @@ export function CaseOpeningModal({
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<ImagePlaceholder | null>(null);
-  const [reelItems, setReelItems] = useState<ImagePlaceholder[]>([]);
-  const [reelStyle, setReelStyle] = useState<React.CSSProperties>({});
   const router = useRouter();
   const { toast } = useToast();
 
@@ -82,25 +78,8 @@ export function CaseOpeningModal({
         userProfile.stars -= caseItem.cost;
     }
 
-    const extendedReel = Array(10)
-      .fill(null)
-      .flatMap(() => [...caseItem.prizes].sort(() => Math.random() - 0.5));
-    setReelItems(extendedReel);
-
     const prizeIndex = Math.floor(Math.random() * caseItem.prizes.length);
     const finalPrize = caseItem.prizes[prizeIndex];
-    
-    const targetIndex = extendedReel.length - caseItem.prizes.length * 2 + prizeIndex;
-    
-    const finalPosition = -(targetIndex * REEL_ITEM_WIDTH - (window.innerWidth / 2) + (REEL_ITEM_WIDTH / 2) - (Math.random() * 80 - 40));
-    
-    // THE FIX IS HERE: Using requestAnimationFrame to ensure the animation triggers correctly.
-    requestAnimationFrame(() => {
-        setReelStyle({
-            '--reel-spin-to': `${finalPosition}px`,
-            animation: `reel-spin ${REEL_SPIN_DURATION_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards`,
-        });
-    });
     
     setTimeout(() => {
       setIsSpinning(false);
@@ -119,14 +98,13 @@ export function CaseOpeningModal({
         }
       }
 
-    }, REEL_SPIN_DURATION_MS);
+    }, REVEAL_DURATION_MS);
   };
 
   const reset = () => {
     setIsOpen(false);
     setWonPrize(null);
     setIsSpinning(false);
-    setReelStyle({});
   }
 
   const handleGoToInventory = () => {
@@ -187,26 +165,10 @@ export function CaseOpeningModal({
   );
 
   const renderSpinningView = () => (
-    <div className="h-full flex flex-col items-center justify-center relative overflow-hidden bg-card/80">
-      <div className="absolute top-1/2 -translate-y-[calc(50%+7rem)] w-4 h-4 bg-primary transform rotate-45 z-20"></div>
-      <div className="absolute top-1/2 translate-y-[calc(50%+7rem)] w-4 h-4 bg-primary transform rotate-45 z-20"></div>
-
-      <div className="text-center absolute top-10">
-        <h2 className="text-3xl font-bold font-headline">{isSpinning ? 'Spinning...' : 'You Won!'}</h2>
-      </div>
-
-      <div className='relative w-full h-40 flex items-center'>
-        <div
-            className='flex items-center will-change-transform'
-            style={reelStyle}
-        >
-            {reelItems.map((prize, index) => (
-              <div key={index} className="flex-shrink-0 w-36 h-36 p-2">
-                  <PrizeDisplay prize={prize} className="transition-transform duration-500" />
-              </div>
-            ))}
-        </div>
-      </div>
+    <div className="h-full flex flex-col items-center justify-center relative overflow-hidden bg-card/80 text-center p-6">
+      <Loader2 className="w-16 h-16 text-primary animate-spin mb-8" />
+      <h2 className="text-3xl font-bold font-headline">Opening Case...</h2>
+      <p className="text-muted-foreground mt-2">Good luck!</p>
     </div>
   );
 
@@ -241,5 +203,3 @@ export function CaseOpeningModal({
     </Dialog>
   );
 }
-
-    
