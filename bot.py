@@ -2,6 +2,10 @@
 import telebot
 from telebot import types
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # It's better to get the token from environment variables
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "8239930030:AAGOiMTBYTstZVINTEGVFEzm5Jeee1hBFJM")
