@@ -133,58 +133,65 @@ export function CaseOpeningModal({
     const newReels: Reel[] = [];
     const finalPrizes: Prize[] = [];
 
+    // First, determine all winning prizes
     for (let i = 0; i < multiplier; i++) {
+        finalPrizes.push(selectPrize(caseItem.prizes));
+    }
+
+    // Then, construct the reels with the guaranteed prize
+    for (let i = 0; i < multiplier; i++) {
+        const winningPrize = finalPrizes[i];
         const prizePool = caseItem.prizes;
+        
+        // Create a long reel with shuffled prizes
         const shuffledPool = shuffle([...prizePool, ...prizePool, ...prizePool]);
         const reelItems = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
-        const winningPrize = selectPrize(prizePool);
-        
+
+        // Find a suitable position for the winning prize in the last 30% of the reel.
         let winningIndex = -1;
-        // Find a winning prize in the last 30% of the reel to ensure it spins for a bit
-        for (let j = Math.floor(reelItems.length * 0.7); j < reelItems.length - 5; j++) {
+        const searchStart = Math.floor(reelItems.length * 0.7);
+        for (let j = searchStart; j < reelItems.length - 5; j++) {
             if (reelItems[j].id === winningPrize.id) {
                 winningIndex = j;
                 break;
             }
         }
-
-        // Fallback if not found (should be rare)
+        
+        // If the prize wasn't found in the target area, place it there.
         if (winningIndex === -1) {
-            winningIndex = reelItems.length - 10;
+            winningIndex = searchStart + Math.floor(Math.random() * 5); // Randomly place it near the start of the target zone
             reelItems[winningIndex] = winningPrize;
         }
 
-        finalPrizes.push(reelItems[winningIndex]);
-        
         newReels.push({
             id: i,
             items: reelItems,
-            offset: 0,
+            offset: 0, // Initial offset
             winningPrize: reelItems[winningIndex],
         });
     }
+
 
     setReels(newReels);
 
     // Use requestAnimationFrame to ensure the initial state is rendered before the transition starts
     requestAnimationFrame(() => {
-        setReels(prevReels => prevReels.map((reel, index) => {
+        setReels(prevReels => prevReels.map((reel) => {
+             const winningItem = reel.winningPrize;
              let winningIndex = -1;
-             // We must find the index of the exact prize we chose earlier in `finalPrizes`.
-             // We can't re-run the selection logic.
-             const finalPrizeForReel = finalPrizes[index];
-             for (let j = Math.floor(reel.items.length * 0.7); j < reel.items.length - 5; j++) {
-                // Find the first instance of the winning prize ID in the target zone.
-                if (reel.items[j].id === finalPrizeForReel.id) {
+
+             // Find the exact index of the predetermined winning prize instance.
+             const searchStart = Math.floor(reel.items.length * 0.7);
+             for (let j = searchStart; j < reel.items.length - 5; j++) {
+                if (reel.items[j].id === winningItem.id) {
                     winningIndex = j;
                     break;
                 }
              }
 
              if (winningIndex === -1) { 
-                // Fallback: place the winning prize at a predictable spot if not found
-                winningIndex = reel.items.length - 10; 
-                reel.items[winningIndex] = finalPrizeForReel;
+                winningIndex = reel.items.length - 10;
+                reel.items[winningIndex] = winningItem;
              }
 
             // Calculate the target offset to center the winning prize
@@ -252,12 +259,12 @@ export function CaseOpeningModal({
                 <RadioGroup 
                     defaultValue="1" 
                     className="grid grid-cols-4 gap-2"
-                    value={multiplier.toString()}
+                    value={String(multiplier)}
                     onValueChange={(val) => setMultiplier(parseInt(val) as Multiplier)}
                 >
                     {MULTIPLIERS.map(m => (
                         <div key={m}>
-                            <RadioGroupItem value={m.toString()} id={`m-${m}`} className="sr-only" />
+                            <RadioGroupItem value={String(m)} id={`m-${m}`} className="sr-only" />
                             <Label 
                                 htmlFor={`m-${m}`} 
                                 className={cn(
@@ -382,3 +389,5 @@ export function CaseOpeningModal({
     </Dialog>
   );
 }
+
+    
