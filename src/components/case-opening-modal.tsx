@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, type ReactNode } from 'react';
@@ -15,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { Case, ImagePlaceholder } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { StarIcon } from './icons/star-icon';
 import { Gift } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
@@ -39,7 +39,7 @@ function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className
           <p className="text-xs font-semibold truncate text-foreground">{prize.description}</p>
           {prize.price && !isStarPrize && (
             <div className="flex items-center justify-center gap-1 text-xs text-yellow-400">
-              <StarIcon className="w-3 h-3 fill-yellow-400" />
+              <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={12} height={12} />
               <span className='font-bold'>{prize.price}</span>
             </div>
           )}
@@ -134,7 +134,7 @@ export function CaseOpeningModal({
           >
               <div className='flex items-center justify-center gap-2'>
                 <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost}`: 'Spin for Free'}</span>
-                {caseItem.cost > 0 && <StarIcon className="w-5 h-5 fill-yellow-400 stroke-yellow-600" />}
+                {caseItem.cost > 0 && <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} />}
               </div>
           </Button>
            <Accordion type="single" collapsible className="w-full">

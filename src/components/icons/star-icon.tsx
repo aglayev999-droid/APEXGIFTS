@@ -1,5 +1,8 @@
+
 import type { SVGProps } from 'react';
 
+// This component is no longer used and can be removed if desired.
+// It has been replaced by an Image component with the new star asset.
 export function StarIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
