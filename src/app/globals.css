@@ -46,6 +46,6 @@
     transform: translateX(0);
   }
   to {
-    transform: var(--reel-spin-to);
+    transform: translateX(var(--reel-spin-to));
   }
 }
