@@ -14,11 +14,11 @@ export function DepositStars() {
       const tg = window.Telegram.WebApp;
       tg.ready();
 
-      // Example: Open invoice for 100 stars
       // The invoice slug must be created by your bot via BotFather's /mybots -> Payments -> Telegram Stars.
-      // Replace 'YOUR_INVOICE_SLUG' with the actual slug for a 100-star package.
-      // You would typically have different slugs for different amounts.
-      tg.openInvoice('YOUR_INVOICE_SLUG_FOR_100_STARS', (status) => {
+      // We are using a test invoice slug provided by Telegram for development.
+      // To use a real invoice, replace this with the slug from BotFather.
+      // For more info, see: https://core.telegram.org/bots/payments/stars#test-invoices
+      tg.openInvoice('test_invoice_100_stars', (status) => {
         setIsDepositing(true);
         if (status === 'paid') {
           toast({
