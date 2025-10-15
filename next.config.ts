@@ -1,3 +1,4 @@
+
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -43,6 +44,9 @@ const nextConfig: NextConfig = {
         destination: '/api/tonconnect-manifest',
       },
     ];
+  },
+  experimental: {
+    allowedDevOrigins: ['*'],
   },
 };
 
