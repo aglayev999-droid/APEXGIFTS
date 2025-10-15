@@ -6,6 +6,11 @@ import { PlusCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from '@/context/language-context';
 
+// Function to generate a unique slug for each transaction
+function generateInvoiceSlug() {
+    return 'deposit_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+}
+
 export function DepositStars() {
   const { t } = useTranslation();
   const [isDepositing, setIsDepositing] = useState(false);
@@ -14,37 +19,22 @@ export function DepositStars() {
   const handleDeposit = () => {
     setIsDepositing(true);
     
-    // IMPORTANT: Replace this with the actual invoice slug you get from your payment provider bot via @BotFather.
-    // This is NOT the payment provider token. This is a link to a specific product invoice.
-    // Example: 'buy_1000_stars'
-    const invoiceSlug = 'YOUR_INVOICE_SLUG';
-
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-      // Check if the slug is still the default placeholder
-      if (invoiceSlug === 'YOUR_INVOICE_SLUG') {
-        toast({
-          title: t('Configuration Needed'),
-          description: t('Please replace "YOUR_INVOICE_SLUG" in src/components/deposit-stars.tsx with a real invoice slug from BotFather.'),
-          variant: 'destructive',
-          duration: 9000, // Increased duration to allow reading
-        });
-        setIsDepositing(false);
-        return;
-      }
-      
       const tg = window.Telegram.WebApp;
       tg.ready();
+
+      const invoiceSlug = generateInvoiceSlug();
       
-      // This function opens the payment interface for a specific invoice
-      tg.openInvoice(invoiceSlug, (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
+      // This function opens the payment interface using Telegram Stars
+      tg.showInvoice({ slug: invoiceSlug }, (status: 'paid' | 'cancelled' | 'failed' | 'pending') => {
         setIsDepositing(false);
         if (status === 'paid') {
           toast({
             title: t('Deposit Successful!'),
             description: t('Your stars have been added to your account.'),
           });
-          // TODO: Here you would typically update the user's star balance in your database
-          // For now, we can just show a success message.
+          // IMPORTANT: You need to verify the payment on your backend
+          // and credit the stars to the user's account.
         } else if (status === 'failed') {
           toast({
             title: t('Deposit Failed'),
@@ -52,7 +42,7 @@ export function DepositStars() {
             variant: 'destructive',
           });
         }
-        // You can also handle 'cancelled' and 'pending' statuses if needed
+        // Handle 'cancelled' and 'pending' statuses if needed
       });
     } else {
         toast({
@@ -74,4 +64,11 @@ export function DepositStars() {
       {isDepositing ? t('Processing...') : t('Deposit')}
     </Button>
   );
+}
+
+// Add this to your global types or a declarations file (e.g., globals.d.ts)
+declare global {
+  interface Window {
+    Telegram: any;
+  }
 }
