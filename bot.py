@@ -2,6 +2,7 @@
 import os
 import telebot
 import logging
+from flask import Flask, request
 
 # It's recommended to use environment variables for sensitive data.
 # These will be set in your deployment environment (e.g., Render.com).
@@ -20,6 +21,23 @@ if not TOKEN:
     exit()
 
 bot = telebot.TeleBot(TOKEN)
+server = Flask(__name__)
+
+@server.route('/' + TOKEN, methods=['POST'])
+def getMessage():
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
+
+@server.route("/")
+def webhook():
+    if APP_URL and TOKEN:
+        bot.remove_webhook()
+        bot.set_webhook(url=APP_URL + '/' + TOKEN)
+        return "Webhook set!", 200
+    return "APP_URL and TOKEN environment variables are not set!", 500
+
 
 def handle_start_command(message):
     chat_id = message.chat.id
@@ -83,25 +101,27 @@ def handle_deposit(chat_id, amount):
         prices=prices
     )
 
-def process_update(data):
-    update = telebot.types.Update.de_json(data)
-    
-    if update.message:
-        message = update.message
-        if message.text and message.text.startswith('/start'):
-            handle_start_command(message)
-        elif message.text and message.text.startswith('/deposit'):
-            handle_deposit(message.chat.id, None)
-        elif message.successful_payment:
-            star_amount = message.successful_payment.total_amount / 100
-            bot.send_message(message.chat.id, f"Hooray! Thanks for your payment. You have received {star_amount} stars.")
-            # Here you would typically update the user's balance in your database.
-    
-    elif update.pre_checkout_query:
-        bot.answer_pre_checkout_query(update.pre_checkout_query.id, True)
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    handle_start_command(message)
+
+@bot.message_handler(commands=['deposit'])
+def send_deposit_options(message):
+    handle_deposit(message.chat.id, None)
+
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(pre_checkout_query):
+    bot.answer_pre_checkout_query(pre_checkout_query.id, True)
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    star_amount = message.successful_payment.total_amount / 100
+    bot.send_message(message.chat.id, f"Hooray! Thanks for your payment. You have received {star_amount} stars.")
+    # Here you would typically update the user's balance in your database.
+
 
 # The following code is for local development and will not be used on Render
 # as Render uses a WSGI server like Gunicorn.
 if __name__ == '__main__':
-    logging.info("Bot started in polling mode for local development.")
-    bot.polling(none_stop=True)
+    logging.info("Starting Flask server for local development.")
+    server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
