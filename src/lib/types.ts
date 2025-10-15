@@ -10,4 +10,5 @@ export type Case = {
   name: string;
   cost: number;
   image: ImagePlaceholder;
+  prizes: ImagePlaceholder[];
 };

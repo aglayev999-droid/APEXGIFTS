@@ -13,11 +13,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { allPrizes } from '@/lib/data';
 import type { Case, ImagePlaceholder } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StarIcon } from './icons/star-icon';
-import { CheckCircle, Gift } from 'lucide-react';
+import { Gift } from 'lucide-react';
 
 const REEL_ITEM_WIDTH = 144; // 128px width + 16px gap
 const REEL_SPIN_DURATION = 5000; // in ms
@@ -56,15 +55,15 @@ export function CaseOpeningModal({
     // Create a long reel of items for a good visual effect
     const extendedReel = Array(5)
       .fill(null)
-      .flatMap(() => [...allPrizes].sort(() => Math.random() - 0.5));
+      .flatMap(() => [...caseItem.prizes].sort(() => Math.random() - 0.5));
     setReelItems(extendedReel);
 
     // Determine the winning prize and its position
-    const prizeIndex = Math.floor(Math.random() * allPrizes.length);
-    const finalPrize = allPrizes[prizeIndex];
+    const prizeIndex = Math.floor(Math.random() * caseItem.prizes.length);
+    const finalPrize = caseItem.prizes[prizeIndex];
     
     // Find final prize in the second to last segment of the reel to ensure smooth stopping
-    const targetIndex = extendedReel.length - allPrizes.length * 2 + prizeIndex;
+    const targetIndex = extendedReel.length - caseItem.prizes.length * 2 + prizeIndex;
     
     // Calculate final position
     // Center of screen - half width of item + random offset within item

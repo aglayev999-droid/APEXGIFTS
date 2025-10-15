@@ -25,64 +25,88 @@
       "imageHint": "epic chest"
     },
     {
-      "id": "nft-1",
-      "description": "Cyber Punk Ape",
-      "imageUrl": "https://picsum.photos/seed/nft1/300/300",
-      "imageHint": "cyberpunk ape"
+      "id": "stars-5",
+      "description": "5 Stars",
+      "imageUrl": "https://picsum.photos/seed/stars5/300/300",
+      "imageHint": "five stars"
     },
     {
-      "id": "nft-2",
-      "description": "Galaxy Orb",
-      "imageUrl": "https://picsum.photos/seed/nft2/300/300",
-      "imageHint": "galaxy orb"
+      "id": "stars-10",
+      "description": "10 Stars",
+      "imageUrl": "https://picsum.photos/seed/stars10/300/300",
+      "imageHint": "ten stars"
     },
     {
-      "id": "nft-3",
-      "description": "Golden Ticket",
-      "imageUrl": "https://picsum.photos/seed/nft3/300/300",
-      "imageHint": "golden ticket"
+      "id": "stars-15",
+      "description": "15 Stars",
+      "imageUrl": "https://picsum.photos/seed/stars15/300/300",
+      "imageHint": "fifteen stars"
     },
     {
-      "id": "nft-4",
-      "description": "Pixel Sword",
-      "imageUrl": "https://picsum.photos/seed/nft4/300/300",
-      "imageHint": "pixel sword"
+      "id": "stars-20",
+      "description": "20 Stars",
+      "imageUrl": "https://picsum.photos/seed/stars20/300/300",
+      "imageHint": "twenty stars"
     },
     {
-      "id": "nft-5",
-      "description": "Mystic Cat",
-      "imageUrl": "https://picsum.photos/seed/nft5/300/300",
-      "imageHint": "mystic cat"
+      "id": "stars-50",
+      "description": "50 Stars",
+      "imageUrl": "https://picsum.photos/seed/stars50/300/300",
+      "imageHint": "fifty stars"
     },
     {
-      "id": "nft-6",
-      "description": "Dragon Egg",
-      "imageUrl": "https://picsum.photos/seed/nft6/300/300",
-      "imageHint": "dragon egg"
+      "id": "stars-100",
+      "description": "100 Stars",
+      "imageUrl": "https://picsum.photos/seed/stars100/300/300",
+      "imageHint": "one hundred stars"
     },
     {
-      "id": "nft-7",
-      "description": "Space Helmet",
-      "imageUrl": "https://picsum.photos/seed/nft7/300/300",
-      "imageHint": "space helmet"
+      "id": "clover-pin",
+      "description": "Clover Pin",
+      "imageUrl": "https://picsum.photos/seed/cloverpin/300/300",
+      "imageHint": "clover pin"
     },
     {
-      "id": "nft-8",
-      "description": "Ancient Scroll",
-      "imageUrl": "https://picsum.photos/seed/nft8/300/300",
-      "imageHint": "ancient scroll"
+      "id": "bow-tie",
+      "description": "Bow Tie",
+      "imageUrl": "https://picsum.photos/seed/bowtie/300/300",
+      "imageHint": "bow tie"
     },
     {
-      "id": "nft-9",
-      "description": "Robot Companion",
-      "imageUrl": "https://picsum.photos/seed/nft9/300/300",
-      "imageHint": "robot companion"
+      "id": "light-sword",
+      "description": "Light Sword",
+      "imageUrl": "https://picsum.photos/seed/lightsword/300/300",
+      "imageHint": "light sword"
     },
     {
-      "id": "nft-10",
-      "description": "Phoenix Feather",
-      "imageUrl": "https://picsum.photos/seed/nft10/300/300",
-      "imageHint": "phoenix feather"
+      "id": "desk-calendar",
+      "description": "Desk Calendar",
+      "imageUrl": "https://picsum.photos/seed/deskcalendar/300/300",
+      "imageHint": "desk calendar"
+    },
+    {
+      "id": "love-potion",
+      "description": "Love Potion",
+      "imageUrl": "https://picsum.photos/seed/lovepotion/300/300",
+      "imageHint": "love potion"
+    },
+    {
+      "id": "cupid-charm",
+      "description": "Cupid Charm",
+      "imageUrl": "https://picsum.photos/seed/cupidcharm/300/300",
+      "imageHint": "cupid charm"
+    },
+    {
+      "id": "skull-flower",
+      "description": "Skull Flower",
+      "imageUrl": "https://picsum.photos/seed/skullflower/300/300",
+      "imageHint": "skull flower"
+    },
+    {
+      "id": "voodoo-doll",
+      "description": "Voodoo Doll",
+      "imageUrl": "https://picsum.photos/seed/voodoodoll/300/300",
+      "imageHint": "voodoo doll"
     },
     {
       "id": "user-avatar",
