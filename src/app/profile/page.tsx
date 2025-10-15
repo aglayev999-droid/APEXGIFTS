@@ -3,11 +3,19 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Bot } from 'lucide-react';
+import { Share2, Bot, Globe } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DepositStars } from '@/components/deposit-stars';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
 
 type TelegramUser = {
   id: number;
@@ -20,6 +28,7 @@ type TelegramUser = {
 export default function ProfilePage() {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState('en');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -109,6 +118,40 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+       <Card className="mt-4 bg-card/50 backdrop-blur-sm border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+                <Globe />
+                Language
+            </CardTitle>
+            <CardDescription>Choose your preferred language.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select a language" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="en">
+                        <div className='flex items-center gap-2'>
+                           <span>🇺🇸</span> English
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="ru">
+                        <div className='flex items-center gap-2'>
+                            <span>🇷🇺</span> Russian
+                        </div>
+                    </SelectItem>
+                    <SelectItem value="uz">
+                       <div className='flex items-center gap-2'>
+                            <span>🇺🇿</span> Uzbek
+                       </div>
+                    </SelectItem>
+                </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
 
       <Card className="mt-4 bg-card/50 backdrop-blur-sm border-primary/20">
         <CardHeader>
