@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { StarIcon } from '@/components/icons/star-icon';
 import { userProfile as defaultUserProfile } from '@/lib/data';
-import { WalletConnectDialog } from '@/components/wallet-connect-dialog';
-import { useTonWallet } from '@tonconnect/ui-react';
+import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
 import { Button } from '../ui/button';
 import { Wallet } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,6 +22,7 @@ export default function Header() {
   const [loading, setLoading] = useState(true);
   const [formattedStars, setFormattedStars] = useState<string | number>(defaultUserProfile.stars);
   const wallet = useTonWallet();
+  const [tonConnectUI] = useTonConnectUI();
 
   useEffect(() => {
     // This now correctly runs only on the client, avoiding the hydration error.
@@ -88,12 +88,21 @@ export default function Header() {
                 size="sm"
                 variant={'secondary'}
                 className="border-primary/50 text-primary"
+                onClick={() => tonConnectUI.openModal()}
               >
                 <Wallet className="mr-2 h-4 w-4" />
                 {formatAddress(wallet.account.address)}
               </Button>
           ) : (
-            <WalletConnectDialog />
+            <Button
+              size="sm"
+              variant={'outline'}
+              className="border-primary/50 text-primary"
+              onClick={() => tonConnectUI.openModal()}
+            >
+              <Wallet className="mr-2 h-4 w-4" />
+              {'Connect Wallet'}
+            </Button>
           )}
         </div>
       </div>
