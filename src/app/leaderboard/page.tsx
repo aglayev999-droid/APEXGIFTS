@@ -1,4 +1,3 @@
-
 'use client';
 import { getLeaderboard, type LeaderboardEntry } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -15,36 +14,30 @@ export default function LeaderboardPage() {
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        // This ensures the component has mounted on the client
+        // This ensures we are on the client side before doing anything with localStorage
         setIsClient(true);
-    }, []);
 
-    useEffect(() => {
-        if (!isClient) return; // Don't run on server or before initial client render
-
-        // Now that we're on the client, we can safely access localStorage
         const loadLeaderboard = () => {
             setLeaderboard(getLeaderboard());
         };
 
+        // Load initial data
         loadLeaderboard();
-
-        // Refresh data when window gets focus
-        window.addEventListener('focus', loadLeaderboard);
         
-        // Also listen for a custom event that we can dispatch after opening a case
+        // Setup event listeners to refresh data
+        window.addEventListener('focus', loadLeaderboard);
         window.addEventListener('leaderboardUpdated', loadLeaderboard);
 
         return () => {
             window.removeEventListener('focus', loadLeaderboard);
             window.removeEventListener('leaderboardUpdated', loadLeaderboard);
         }
-    }, [isClient]);
+    }, []);
 
-  if (!isClient) {
-    // Render a loading state or nothing on the server to prevent hydration mismatch
-    return null; 
-  }
+    // Render nothing until the component has mounted on the client to avoid hydration mismatch
+    if (!isClient) {
+        return null;
+    }
 
   return (
     <div className="container mx-auto px-4 py-8">
