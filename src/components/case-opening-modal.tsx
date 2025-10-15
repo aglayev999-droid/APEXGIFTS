@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, type ReactNode, useEffect } from 'react';
+import { useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -19,9 +19,14 @@ import { cn } from '@/lib/utils';
 import { Gift, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addInventoryItem, userProfile } from '@/lib/data';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Label } from './ui/label';
+import { ScrollArea } from './ui/scroll-area';
 
 const REVEAL_DURATION_MS = 5000;
 const REEL_ITEM_WIDTH = 128; // 8rem in pixels (w-32)
+const MULTIPLIERS = [1, 3, 5, 10] as const;
+type Multiplier = typeof MULTIPLIERS[number];
 
 // Fisher-Yates shuffle algorithm
 const shuffle = (array: any[]) => {
@@ -60,6 +65,13 @@ function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className
   )
 }
 
+interface Reel {
+  id: number;
+  items: ImagePlaceholder[];
+  offset: number;
+  winningPrize: ImagePlaceholder;
+}
+
 export function CaseOpeningModal({
   children,
   caseItem,
@@ -69,100 +81,114 @@ export function CaseOpeningModal({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [wonPrize, setWonPrize] = useState<ImagePlaceholder | null>(null);
-  const [reelItems, setReelItems] = useState<ImagePlaceholder[]>([]);
-  const [reelOffset, setReelOffset] = useState(0);
+  const [wonPrizes, setWonPrizes] = useState<ImagePlaceholder[]>([]);
+  const [reels, setReels] = useState<Reel[]>([]);
+  const [multiplier, setMultiplier] = useState<Multiplier>(1);
+  
   const router = useRouter();
   const { toast } = useToast();
   const [_, setForceRender] = useState(0);
 
+  const totalCost = caseItem.cost * multiplier;
+
   const handleOpenCase = () => {
-    if (userProfile.stars < caseItem.cost && caseItem.cost > 0) {
+    if (userProfile.stars < totalCost && caseItem.cost > 0) {
       toast({
         title: 'Not enough stars!',
-        description: `You need ${caseItem.cost} stars to open this case.`,
+        description: `You need ${totalCost} stars to open ${multiplier}x case(s).`,
         variant: 'destructive',
       });
       return;
     }
     
-    setWonPrize(null);
+    setWonPrizes([]);
     setIsSpinning(true);
     
-    // Deduct stars for opening the case
     if (caseItem.cost > 0) {
-        userProfile.stars -= caseItem.cost;
-        setForceRender(Math.random()); // force re-render to update header
+        userProfile.stars -= totalCost;
+        setForceRender(Math.random());
     }
 
-    // --- Roulette Logic ---
-    const prizePool = caseItem.prizes;
-    
-    const shuffledPool = shuffle([...prizePool]);
-    // Create a long reel for a good spinning effect
-    const reel = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
+    const newReels: Reel[] = [];
+    const finalPrizes: ImagePlaceholder[] = [];
 
-    // Determine the winning prize.
-    const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
-    
-    // Find a valid index for the winning prize in the latter half of the reel
-    // to ensure it has enough space to spin and land.
-    let winningIndex = -1;
-    for (let i = Math.floor(reel.length * 0.7); i < reel.length - 5; i++) {
-        if (reel[i].id === winningPrize.id) {
-            winningIndex = i;
-            break;
+    for (let i = 0; i < multiplier; i++) {
+        const prizePool = caseItem.prizes;
+        const shuffledPool = shuffle([...prizePool]);
+        const reelItems = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
+        const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
+        
+        let winningIndex = -1;
+        for (let j = Math.floor(reelItems.length * 0.7); j < reelItems.length - 5; j++) {
+            if (reelItems[j].id === winningPrize.id) {
+                winningIndex = j;
+                break;
+            }
         }
+
+        if (winningIndex === -1) {
+            winningIndex = reelItems.length - 10;
+            reelItems[winningIndex] = winningPrize;
+        }
+
+        finalPrizes.push(reelItems[winningIndex]);
+        
+        newReels.push({
+            id: i,
+            items: reelItems,
+            offset: 0,
+            winningPrize: reelItems[winningIndex],
+        });
     }
 
-    // Fallback if not found (should be very rare)
-    // Place it somewhere near the end.
-    if (winningIndex === -1) {
-        winningIndex = reel.length - 10;
-        reel[winningIndex] = winningPrize;
-    }
+    setReels(newReels);
 
-    setReelItems(reel);
-    setReelOffset(0); // Reset position instantly
-
-    // Force a browser reflow before starting the transition
-    // to ensure the animation plays correctly.
     requestAnimationFrame(() => {
-        // Calculate the final offset to center the winning item
-        // Add some random jitter to make the landing spot less predictable
-        const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6);
-        const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2) + jitter;
-        setReelOffset(targetOffset);
+        setReels(prevReels => prevReels.map((reel, index) => {
+             let winningIndex = -1;
+             for (let j = Math.floor(reel.items.length * 0.7); j < reel.items.length - 5; j++) {
+                if (reel.items[j].id === finalPrizes[index].id) {
+                    winningIndex = j;
+                    break;
+                }
+             }
+             if (winningIndex === -1) { winningIndex = reel.items.length - 10; }
+
+            const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6);
+            const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2) + jitter;
+            return { ...reel, offset: targetOffset };
+        }));
     });
-    // --- End Roulette Logic ---
 
     setTimeout(() => {
-      const finalPrize = reel[winningIndex];
       setIsSpinning(false);
-      setWonPrize(finalPrize);
+      setWonPrizes(finalPrizes);
       
-      if (!finalPrize.description.includes('Stars')) {
-        addInventoryItem({
-            id: `${finalPrize.id}-${Date.now()}`,
-            name: finalPrize.description,
-            image: finalPrize,
-        });
-      } else {
-        const starAmount = parseInt(finalPrize.description.split(' ')[0]);
-        if (!isNaN(starAmount)) {
-            userProfile.stars += starAmount;
-        }
-      }
-      setForceRender(Math.random()); // force re-render to update header
-    }, REVEAL_DURATION_MS + 200); // Add a slight delay to match animation
+      finalPrizes.forEach(prize => {
+          if (!prize.description.includes('Stars')) {
+            addInventoryItem({
+                id: `${prize.id}-${Date.now()}-${Math.random()}`,
+                name: prize.description,
+                image: prize,
+            });
+          } else {
+            const starAmount = parseInt(prize.description.split(' ')[0]);
+            if (!isNaN(starAmount)) {
+                userProfile.stars += starAmount;
+            }
+          }
+      });
+      
+      setForceRender(Math.random());
+    }, REVEAL_DURATION_MS + 200);
   };
 
   const reset = () => {
     setIsOpen(false);
-    setWonPrize(null);
+    setWonPrizes([]);
     setIsSpinning(false);
-    setReelItems([]);
-    setReelOffset(0);
+    setReels([]);
+    setMultiplier(1);
   }
 
   const handleGoToInventory = () => {
@@ -186,7 +212,25 @@ export function CaseOpeningModal({
                   data-ai-hint={caseItem.image.imageHint}
               />
           </div>
-          <p className="text-muted-foreground mt-4">You are about to open this case.</p>
+           {caseItem.cost > 0 && (
+             <div className='mt-4 w-full'>
+                <p className="text-muted-foreground mb-2">How many to open?</p>
+                <RadioGroup 
+                    defaultValue="1" 
+                    className="grid grid-cols-4 gap-2"
+                    onValueChange={(val) => setMultiplier(parseInt(val) as Multiplier)}
+                >
+                    {MULTIPLIERS.map(m => (
+                        <div key={m}>
+                            <RadioGroupItem value={m.toString()} id={`m-${m}`} className="sr-only" />
+                            <Label htmlFor={`m-${m}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-primary">
+                                {m}x
+                            </Label>
+                        </div>
+                    ))}
+                </RadioGroup>
+             </div>
+           )}
       </div>
       
       <DialogFooter className="p-4 flex flex-col gap-2 border-t border-border">
@@ -197,7 +241,7 @@ export function CaseOpeningModal({
             disabled={isSpinning}
           >
               <div className='flex items-center justify-center gap-2'>
-                <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost.toLocaleString()}`: 'Spin for Free'}</span>
+                <span>{caseItem.cost > 0 ? `Spin for ${totalCost.toLocaleString()}`: 'Spin for Free'}</span>
                 {caseItem.cost > 0 && <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={20} height={20} />}
               </div>
           </Button>
@@ -224,41 +268,52 @@ export function CaseOpeningModal({
 
   const renderSpinningView = () => (
     <div className="h-full flex flex-col items-center justify-center relative overflow-hidden bg-card/80 text-center p-6">
-      <h2 className="text-3xl font-bold font-headline mb-8">Opening...</h2>
-      <div className="relative w-full h-32 flex items-center justify-center">
-        {/* The Marker */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-0.5 h-36 bg-primary z-10 rounded-full" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 100%, 0 0, 100% 0)'}}/>
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 0, 0 100%, 100% 100%)'}}/>
-        
-        {/* The Reel */}
-        <div 
-          className="absolute left-1/2 h-full flex items-center transition-transform duration-5000 ease-out"
-          style={{ transform: `translateX(calc(-${reelOffset}px))` }}
-        >
-          {reelItems.map((prize, index) => (
-            <div key={`${prize.id}-${index}`} className="w-32 h-32 shrink-0 p-2">
-              <div className="w-full h-full bg-background/30 rounded-lg p-1">
-                <PrizeDisplay prize={prize} />
+      <h2 className="text-3xl font-bold font-headline mb-4">Opening {multiplier > 1 ? `${multiplier} cases...` : '...'}</h2>
+      <ScrollArea className="w-full flex-grow">
+          <div className='flex flex-col items-center gap-4 py-4'>
+            {reels.map((reel) => (
+              <div key={reel.id} className="relative w-full h-32 flex items-center justify-center">
+                {/* The Marker */}
+                <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-0.5 h-36 bg-primary z-10 rounded-full" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 100%, 0 0, 100% 0)'}}/>
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 0, 0 100%, 100% 100%)'}}/>
+                
+                {/* The Reel */}
+                <div 
+                  className="absolute left-1/2 h-full flex items-center transition-transform duration-5000 ease-out"
+                  style={{ transform: `translateX(calc(-${reel.offset}px))` }}
+                >
+                  {reel.items.map((prize, index) => (
+                    <div key={`${prize.id}-${index}`} className="w-32 h-32 shrink-0 p-2">
+                      <div className="w-full h-full bg-background/30 rounded-lg p-1">
+                        <PrizeDisplay prize={prize} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+            ))}
+          </div>
+      </ScrollArea>
     </div>
   );
 
   const renderWonView = () => (
      <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-card/80">
         <h2 className="text-3xl font-bold font-headline mb-4">You Won!</h2>
-        <div className="relative w-48 h-48 bg-background/50 rounded-lg p-2 border-2 border-primary shadow-2xl shadow-primary/30 mb-4">
-             <PrizeDisplay prize={wonPrize!} />
-        </div>
-        <h3 className="text-xl font-bold font-headline">{wonPrize!.description}</h3>
+        <ScrollArea className='w-full max-w-md flex-grow my-4'>
+            <div className="grid grid-cols-3 gap-2 p-1">
+                {wonPrizes.map((prize, index) => (
+                    <div key={`${prize.id}-${index}`} className="aspect-square">
+                        <PrizeDisplay prize={prize} />
+                    </div>
+                ))}
+            </div>
+        </ScrollArea>
         <p className="text-muted-foreground mb-6">
-            {wonPrize!.description.includes('Stars') ? 'has been added to your balance.' : 'has been added to your inventory.'}
+            Your new items have been added to your inventory.
         </p>
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-2 w-full max-w-sm">
             <Button onClick={handleGoToInventory}>
                 <Gift className="mr-2 h-4 w-4" />
                 Go to Inventory
@@ -274,8 +329,9 @@ export function CaseOpeningModal({
         {children}
       </DialogTrigger>
       <DialogContent className="w-full h-full max-h-full sm:max-w-full sm:h-full p-0 bg-transparent border-none flex flex-col">
-        {!wonPrize ? (isSpinning ? renderSpinningView() : renderInitialView()) : renderWonView()}
+        {wonPrizes.length === 0 ? (isSpinning ? renderSpinningView() : renderInitialView()) : renderWonView()}
       </DialogContent>
     </Dialog>
   );
 }
+
