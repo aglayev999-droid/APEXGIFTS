@@ -3,6 +3,7 @@ export type ImagePlaceholder = {
   description: string;
   imageUrl: string;
   imageHint: string;
+  price?: number;
 };
 
 export type Case = {

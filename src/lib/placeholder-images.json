@@ -64,49 +64,57 @@
       "id": "clover-pin",
       "description": "Clover Pin",
       "imageUrl": "https://picsum.photos/seed/cloverpin/300/300",
-      "imageHint": "clover pin"
+      "imageHint": "clover pin",
+      "price": 500
     },
     {
       "id": "bow-tie",
       "description": "Bow Tie",
       "imageUrl": "https://picsum.photos/seed/bowtie/300/300",
-      "imageHint": "bow tie"
+      "imageHint": "bow tie",
+      "price": 600
     },
     {
       "id": "light-sword",
       "description": "Light Sword",
       "imageUrl": "https://picsum.photos/seed/lightsword/300/300",
-      "imageHint": "light sword"
+      "imageHint": "light sword",
+      "price": 800
     },
     {
       "id": "desk-calendar",
       "description": "Desk Calendar",
       "imageUrl": "https://picsum.photos/seed/deskcalendar/300/300",
-      "imageHint": "desk calendar"
+      "imageHint": "desk calendar",
+      "price": 270
     },
     {
       "id": "love-potion",
       "description": "Love Potion",
       "imageUrl": "https://picsum.photos/seed/lovepotion/300/300",
-      "imageHint": "love potion"
+      "imageHint": "love potion",
+      "price": 1500
     },
     {
       "id": "cupid-charm",
       "description": "Cupid Charm",
       "imageUrl": "https://picsum.photos/seed/cupidcharm/300/300",
-      "imageHint": "cupid charm"
+      "imageHint": "cupid charm",
+      "price": 2000
     },
     {
       "id": "skull-flower",
       "description": "Skull Flower",
       "imageUrl": "https://picsum.photos/seed/skullflower/300/300",
-      "imageHint": "skull flower"
+      "imageHint": "skull flower",
+      "price": 1700
     },
     {
       "id": "voodoo-doll",
       "description": "Voodoo Doll",
       "imageUrl": "https://picsum.photos/seed/voodoodoll/300/300",
-      "imageHint": "voodoo doll"
+      "imageHint": "voodoo doll",
+      "price": 3000
     },
     {
       "id": "user-avatar",

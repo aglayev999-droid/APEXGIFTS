@@ -16,11 +16,37 @@ import { useToast } from '@/hooks/use-toast';
 import type { Case, ImagePlaceholder } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { StarIcon } from './icons/star-icon';
-import { Gift, ChevronDown } from 'lucide-react';
+import { Gift } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const REEL_ITEM_WIDTH = 144; // w-36
 const REEL_SPIN_DURATION_MS = 5000;
+
+function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className?: string }) {
+  const isStarPrize = prize.description.includes('Stars');
+  return (
+    <div className={cn("bg-background/50 rounded-xl w-full h-full flex flex-col items-center justify-center p-2 text-center", className)}>
+        <div className="relative w-full flex-grow">
+            <Image
+                src={prize.imageUrl}
+                alt={prize.description}
+                fill
+                className="object-contain"
+                data-ai-hint={prize.imageHint}
+            />
+        </div>
+        <div className="mt-2 text-center">
+          <p className="text-xs font-semibold truncate text-foreground">{prize.description}</p>
+          {prize.price && !isStarPrize && (
+            <div className="flex items-center justify-center gap-1 text-xs text-yellow-400">
+              <StarIcon className="w-3 h-3 fill-yellow-400" />
+              <span className='font-bold'>{prize.price}</span>
+            </div>
+          )}
+        </div>
+    </div>
+  )
+}
 
 export function CaseOpeningModal({
   children,
@@ -120,8 +146,8 @@ export function CaseOpeningModal({
               <AccordionContent className="p-4 bg-background/80 rounded-b-lg">
                 <div className="grid grid-cols-4 gap-2">
                   {caseItem.prizes.map(prize => (
-                    <div key={prize.id} className="p-2 bg-card rounded-md flex items-center justify-center aspect-square">
-                      <Image src={prize.imageUrl} alt={prize.description} width={64} height={64} className="object-contain" data-ai-hint={prize.imageHint} />
+                    <div key={prize.id} className="p-1 bg-card rounded-md aspect-square">
+                        <PrizeDisplay prize={prize} />
                     </div>
                   ))}
                 </div>
@@ -134,34 +160,25 @@ export function CaseOpeningModal({
 
   const renderSpinningView = () => (
     <div className="h-full flex flex-col items-center justify-center relative overflow-hidden bg-card/80">
-      <div className="absolute top-1/2 -translate-y-[calc(50%+6rem)] w-4 h-4 bg-primary transform rotate-45 z-20"></div>
-      <div className="absolute top-1/2 translate-y-[calc(50%+6rem)] w-4 h-4 bg-primary transform rotate-45 z-20"></div>
+      <div className="absolute top-1/2 -translate-y-[calc(50%+7rem)] w-4 h-4 bg-primary transform rotate-45 z-20"></div>
+      <div className="absolute top-1/2 translate-y-[calc(50%+7rem)] w-4 h-4 bg-primary transform rotate-45 z-20"></div>
 
       <div className="text-center absolute top-10">
         <h2 className="text-3xl font-bold font-headline">{isSpinning ? 'Spinning...' : 'You Won!'}</h2>
       </div>
 
-      <div className='relative w-full'>
+      <div className='relative w-full h-40 flex items-center'>
         <div
             className={cn('flex items-center will-change-transform', isSpinning && 'animate-reel-spin')}
             style={{
                 '--reel-spin-to': `${reelSpinTo}px`,
-                '--reel-spin-duration': `${REEL_SPIN_DURATION_MS}ms`
+                animationDuration: `${REEL_SPIN_DURATION_MS}ms`
             } as React.CSSProperties}
         >
             {reelItems.map((prize, index) => (
-            <div key={index} className="flex-shrink-0 w-36 h-36 p-2">
-                <div className="bg-background/50 rounded-xl w-full h-full flex items-center justify-center p-2">
-                    <Image
-                        src={prize.imageUrl}
-                        alt={prize.description}
-                        width={128}
-                        height={128}
-                        className="object-contain w-full h-full transition-all"
-                        data-ai-hint={prize.imageHint}
-                    />
-                </div>
-            </div>
+              <div key={index} className="flex-shrink-0 w-36 h-36 p-2">
+                  <PrizeDisplay prize={prize} className="transition-transform duration-500" />
+              </div>
             ))}
         </div>
       </div>
@@ -171,15 +188,9 @@ export function CaseOpeningModal({
   const renderWonView = () => (
      <div className="h-full flex flex-col items-center justify-center text-center p-6 bg-card/80">
         <h2 className="text-3xl font-bold font-headline mb-4">You Won!</h2>
-        <div className="relative w-40 h-40 bg-background rounded-lg p-2 border-2 border-primary shadow-2xl shadow-primary/30 mb-4">
-             <Image
-                src={wonPrize!.imageUrl}
-                alt={wonPrize!.description}
-                fill
-                className="object-contain"
-                data-ai-hint={wonPrize!.imageHint}
-            />
-         </div>
+        <div className="relative w-48 h-48 bg-background/50 rounded-lg p-2 border-2 border-primary shadow-2xl shadow-primary/30 mb-4">
+             <PrizeDisplay prize={wonPrize!} />
+        </div>
         <h3 className="text-xl font-bold font-headline">{wonPrize!.description}</h3>
         <p className="text-muted-foreground mb-6">has been added to your inventory.</p>
         <div className="flex flex-col gap-2 w-full">
@@ -196,14 +207,12 @@ export function CaseOpeningModal({
   )
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) reset(); setIsOpen(open); }}>
       <DialogTrigger asChild onClick={() => setIsOpen(true)}>
         {children}
       </DialogTrigger>
       <DialogContent className="w-full h-full max-h-full sm:max-w-full sm:h-full p-0 bg-transparent border-none flex flex-col">
-        {!isSpinning && !wonPrize ? renderInitialView() : null}
-        {isSpinning && !wonPrize ? renderSpinningView() : null}
-        {!isSpinning && wonPrize ? renderWonView() : null}
+        {!wonPrize ? (isSpinning ? renderSpinningView() : renderInitialView()) : renderWonView()}
       </DialogContent>
     </Dialog>
   );
