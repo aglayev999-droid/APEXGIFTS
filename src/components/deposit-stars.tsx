@@ -10,44 +10,11 @@ export function DepositStars() {
   const { toast } = useToast();
 
   const handleDeposit = () => {
-    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-
-      // The invoice slug must be created by your bot via BotFather's /mybots -> Payments -> Telegram Stars.
-      // We are using a test invoice slug provided by Telegram for development.
-      // To use a real invoice, replace this with the slug from BotFather.
-      // For more info, see: https://core.telegram.org/bots/payments/stars#test-invoices
-      tg.openInvoice('test_invoice_100_stars', (status) => {
-        setIsDepositing(true);
-        if (status === 'paid') {
-          toast({
-            title: 'Payment Successful!',
-            description: 'Your stars have been added to your account.',
-          });
-          // Here you would also update the user's star balance in your backend
-        } else if (status === 'failed') {
-          toast({
-            title: 'Payment Failed',
-            description: 'Something went wrong. Please try again.',
-            variant: 'destructive',
-          });
-        } else if (status === 'cancelled') {
-           toast({
-            title: 'Payment Cancelled',
-            description: 'The payment process was cancelled.',
-            variant: 'destructive',
-          });
-        }
-        setIsDepositing(false);
-      });
-    } else {
-      toast({
+    toast({
         title: 'Telegram Only Feature',
         description: 'Deposits can only be made within the Telegram app.',
         variant: 'destructive',
       });
-    }
   };
 
   return (

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { userProfile as defaultUserProfile } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Share2, Bot } from 'lucide-react';
+import { Share2, Bot, PlusCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { DepositStars } from '@/components/deposit-stars';
+import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type TelegramUser = {
@@ -20,6 +20,7 @@ type TelegramUser = {
 export default function ProfilePage() {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
@@ -49,6 +50,14 @@ export default function ProfilePage() {
         setLoading(false);
     }
   }, []);
+  
+  const handleDepositClick = () => {
+    toast({
+        title: 'Telegram Only Feature',
+        description: 'Deposits can only be made within the Telegram app.',
+        variant: 'destructive',
+      });
+  }
 
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
   const displayUsername = user?.username ? `@${user.username}` : 'No Telegram ID';
@@ -95,7 +104,10 @@ export default function ProfilePage() {
             <CardDescription>Add more stars to your balance to open cases.</CardDescription>
           </CardHeader>
           <CardContent>
-            <DepositStars />
+             <Button className="w-full" onClick={handleDepositClick}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Deposit
+            </Button>
           </CardContent>
         </Card>
       </div>
