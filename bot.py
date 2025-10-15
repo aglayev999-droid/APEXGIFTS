@@ -13,9 +13,20 @@ bot = telebot.TeleBot(BOT_TOKEN)
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     # Check if the start command has a payload (deep link)
-    if len(message.text.split()) > 1 and message.text.split()[1] == 'deposit':
-        command_deposit(message)
-        return
+    if len(message.text.split()) > 1:
+        payload = message.text.split()[1]
+        if payload.startswith('deposit'):
+            try:
+                # e.g., "deposit" or "deposit_500"
+                parts = payload.split('_')
+                if len(parts) > 1 and parts[1].isdigit():
+                    amount = int(parts[1])
+                    command_deposit(message, amount)
+                else:
+                    command_deposit(message, None)
+            except (ValueError, IndexError):
+                command_deposit(message, None)
+            return
 
     markup = types.InlineKeyboardMarkup(row_width=1)
     
@@ -41,17 +52,25 @@ def send_welcome(message):
     )
 
 @bot.message_handler(commands=['deposit'])
-def command_deposit(message):
-    prices = [
-        types.LabeledPrice(label='100 Stars', amount=100),
-        types.LabeledPrice(label='500 Stars', amount=500),
-        types.LabeledPrice(label='1000 Stars', amount=1000),
-    ]
+def command_deposit_handler(message):
+    command_deposit(message, None)
+
+def command_deposit(message, amount=None):
+    if amount and amount > 0:
+         prices = [types.LabeledPrice(label=f'{amount} Stars', amount=amount)]
+         description = f'Add {amount} stars to your balance!'
+    else:
+        prices = [
+            types.LabeledPrice(label='100 Stars', amount=100),
+            types.LabeledPrice(label='500 Stars', amount=500),
+            types.LabeledPrice(label='1000 Stars', amount=1000),
+        ]
+        description = 'Add stars to your balance to open more cases!'
 
     bot.send_invoice(
         message.chat.id,
         title='Deposit Stars',
-        description='Add stars to your balance to open more cases!',
+        description=description,
         provider_token=PAYMENT_PROVIDER_TOKEN,
         currency='XTR',
         prices=prices,
