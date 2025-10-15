@@ -16,13 +16,13 @@ import { MyTonWalletIcon } from './icons/mytonwallet-icon';
 import { TonhubIcon } from './icons/tonhub-icon';
 import { TonConnectIcon } from './icons/ton-connect-icon';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import type { WALLET_ID } from '@tonconnect/ui-react';
+import type { WalletInfo } from '@tonconnect/ui-react';
 
 
 const walletProviders = [
-  { name: 'Tonkeeper', icon: <TonkeeperIcon className="w-12 h-12" />, id: 'tonkeeper' as WALLET_ID },
-  { name: 'MyTonWallet', icon: <MyTonWalletIcon className="w-12 h-12" />, id: 'mytonwallet' as WALLET_ID },
-  { name: 'Tonhub', icon: <TonhubIcon className="w-12 h-12" />, id: 'tonhub' as WALLET_ID },
+  { name: 'Tonkeeper', icon: <TonkeeperIcon className="w-12 h-12" />, appName: 'tonkeeper' as WalletInfo['appName'] },
+  { name: 'MyTonWallet', icon: <MyTonWalletIcon className="w-12 h-12" />, appName: 'mytonwallet' as WalletInfo['appName'] },
+  { name: 'Tonhub', icon: <TonhubIcon className="w-12 h-12" />, appName: 'tonhub' as WalletInfo['appName'] },
 ];
 
 export function WalletConnectDialog() {
@@ -30,10 +30,25 @@ export function WalletConnectDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const handleConnect = async (walletId: WALLET_ID) => {
+  const handleConnect = async (walletAppName: WalletInfo['appName']) => {
     try {
         setIsConnecting(true);
-        await tonConnectUI.connect(walletId);
+        await tonConnectUI.openModal({
+            walletsList: {
+                // @ts-ignore
+                'tonkeeper': {
+                    appName: "tonkeeper",
+                    name: "Tonkeeper",
+                    imageUrl: "https://s.tonkeeper.com/ton-connect/logo.png",
+                    aboutUrl: "https://tonkeeper.com",
+                    universalLink: "https://app.tonkeeper.com/ton-connect",
+                    bridgeUrl: "https://bridge.tonapi.io/bridge",
+                    jsBridgeKey: "tonkeeper",
+                    platforms: ["ios", "android", "chrome", "firefox"]
+                },
+            },
+            appName: walletAppName,
+        });
         setIsOpen(false);
     } catch (error) {
         console.error('Failed to connect wallet:', error);
@@ -64,7 +79,7 @@ export function WalletConnectDialog() {
         <div className="p-6 pt-4 flex flex-col gap-4">
           <div className="grid grid-cols-3 gap-4 text-center">
             {walletProviders.map((wallet) => (
-              <div key={wallet.name} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => !isConnecting && handleConnect(wallet.id)}>
+              <div key={wallet.name} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => !isConnecting && handleConnect(wallet.appName)}>
                 <div className="p-2 rounded-xl bg-background/50 group-hover:bg-accent transition-colors relative">
                   {wallet.icon}
                   {isConnecting && (
