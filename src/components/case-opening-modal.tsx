@@ -51,7 +51,7 @@ function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className
           <p className="text-xs font-semibold truncate text-foreground">{prize.description}</p>
           {prize.price && !isStarPrize && (
             <div className="flex items-center justify-center gap-1 text-xs text-yellow-400">
-              <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={12} height={12} />
+              <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={12} height={12} />
               <span className='font-bold'>{prize.price}</span>
             </div>
           )}
@@ -99,55 +99,62 @@ export function CaseOpeningModal({
     const prizePool = caseItem.prizes;
     
     const shuffledPool = shuffle([...prizePool]);
+    // Create a long reel for a good spinning effect
     const reel = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
 
     // Determine the winning prize.
     const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
     
     // Find a valid index for the winning prize in the latter half of the reel
+    // to ensure it has enough space to spin and land.
     let winningIndex = -1;
-    for (let i = Math.floor(reel.length / 2); i < reel.length; i++) {
+    for (let i = Math.floor(reel.length * 0.7); i < reel.length - 5; i++) {
         if (reel[i].id === winningPrize.id) {
             winningIndex = i;
             break;
         }
     }
-    // Fallback if not found (should be rare)
+
+    // Fallback if not found (should be very rare)
+    // Place it somewhere near the end.
     if (winningIndex === -1) {
-        reel[reel.length - 5] = winningPrize;
-        winningIndex = reel.length - 5;
+        winningIndex = reel.length - 10;
+        reel[winningIndex] = winningPrize;
     }
 
-
     setReelItems(reel);
-    setReelOffset(0); // Reset position
+    setReelOffset(0); // Reset position instantly
 
     // Force a browser reflow before starting the transition
+    // to ensure the animation plays correctly.
     requestAnimationFrame(() => {
         // Calculate the final offset to center the winning item
-        const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2);
+        // Add some random jitter to make the landing spot less predictable
+        const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6);
+        const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2) + jitter;
         setReelOffset(targetOffset);
     });
     // --- End Roulette Logic ---
 
     setTimeout(() => {
+      const finalPrize = reel[winningIndex];
       setIsSpinning(false);
-      setWonPrize(winningPrize);
+      setWonPrize(finalPrize);
       
-      if (!winningPrize.description.includes('Stars')) {
+      if (!finalPrize.description.includes('Stars')) {
         addInventoryItem({
-            id: `${winningPrize.id}-${Date.now()}`,
-            name: winningPrize.description,
-            image: winningPrize,
+            id: `${finalPrize.id}-${Date.now()}`,
+            name: finalPrize.description,
+            image: finalPrize,
         });
       } else {
-        const starAmount = parseInt(winningPrize.description.split(' ')[0]);
+        const starAmount = parseInt(finalPrize.description.split(' ')[0]);
         if (!isNaN(starAmount)) {
             userProfile.stars += starAmount;
         }
       }
       setForceRender(Math.random()); // force re-render to update header
-    }, REVEAL_DURATION_MS);
+    }, REVEAL_DURATION_MS + 200); // Add a slight delay to match animation
   };
 
   const reset = () => {
@@ -191,7 +198,7 @@ export function CaseOpeningModal({
           >
               <div className='flex items-center justify-center gap-2'>
                 <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost.toLocaleString()}`: 'Spin for Free'}</span>
-                {caseItem.cost > 0 && <Image src="https://i.ibb.co/xLwMh2k/star.png" alt="Stars" width={20} height={20} />}
+                {caseItem.cost > 0 && <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={20} height={20} />}
               </div>
           </Button>
            <Accordion type="single" collapsible className="w-full">
