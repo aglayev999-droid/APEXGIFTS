@@ -1,3 +1,88 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "case-180",
+      "description": "Common Case",
+      "imageUrl": "https://picsum.photos/seed/case180/400/500",
+      "imageHint": "treasure chest"
+    },
+    {
+      "id": "case-300",
+      "description": "Rare Case",
+      "imageUrl": "https://picsum.photos/seed/case300/400/500",
+      "imageHint": "glowing chest"
+    },
+    {
+      "id": "case-500",
+      "description": "Legendary Case",
+      "imageUrl": "https://picsum.photos/seed/case500/400/500",
+      "imageHint": "epic chest"
+    },
+    {
+      "id": "nft-1",
+      "description": "Cyber Punk Ape",
+      "imageUrl": "https://picsum.photos/seed/nft1/300/300",
+      "imageHint": "cyberpunk ape"
+    },
+    {
+      "id": "nft-2",
+      "description": "Galaxy Orb",
+      "imageUrl": "https://picsum.photos/seed/nft2/300/300",
+      "imageHint": "galaxy orb"
+    },
+    {
+      "id": "nft-3",
+      "description": "Golden Ticket",
+      "imageUrl": "https://picsum.photos/seed/nft3/300/300",
+      "imageHint": "golden ticket"
+    },
+    {
+      "id": "nft-4",
+      "description": "Pixel Sword",
+      "imageUrl": "https://picsum.photos/seed/nft4/300/300",
+      "imageHint": "pixel sword"
+    },
+    {
+      "id": "nft-5",
+      "description": "Mystic Cat",
+      "imageUrl": "https://picsum.photos/seed/nft5/300/300",
+      "imageHint": "mystic cat"
+    },
+    {
+      "id": "nft-6",
+      "description": "Dragon Egg",
+      "imageUrl": "https://picsum.photos/seed/nft6/300/300",
+      "imageHint": "dragon egg"
+    },
+    {
+      "id": "nft-7",
+      "description": "Space Helmet",
+      "imageUrl": "https://picsum.photos/seed/nft7/300/300",
+      "imageHint": "space helmet"
+    },
+    {
+      "id": "nft-8",
+      "description": "Ancient Scroll",
+      "imageUrl": "https://picsum.photos/seed/nft8/300/300",
+      "imageHint": "ancient scroll"
+    },
+    {
+      "id": "nft-9",
+      "description": "Robot Companion",
+      "imageUrl": "https://picsum.photos/seed/nft9/300/300",
+      "imageHint": "robot companion"
+    },
+    {
+      "id": "nft-10",
+      "description": "Phoenix Feather",
+      "imageUrl": "https://picsum.photos/seed/nft10/300/300",
+      "imageHint": "phoenix feather"
+    },
+    {
+      "id": "user-avatar",
+      "description": "User Avatar",
+      "imageUrl": "https://picsum.photos/seed/nullrox/100/100",
+      "imageHint": "user avatar"
+    }
+  ]
 }
