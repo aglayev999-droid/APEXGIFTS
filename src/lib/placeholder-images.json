@@ -1,21 +1,27 @@
 {
   "placeholderImages": [
     {
+      "id": "case-free",
+      "description": "Free Case",
+      "imageUrl": "https://picsum.photos/seed/casefree/400/400",
+      "imageHint": "treasure gift box"
+    },
+    {
       "id": "case-180",
-      "description": "Common Case",
-      "imageUrl": "https://picsum.photos/seed/case180/400/500",
+      "description": "Floor Case",
+      "imageUrl": "https://picsum.photos/seed/case180/400/400",
       "imageHint": "treasure chest"
     },
     {
       "id": "case-300",
-      "description": "Rare Case",
-      "imageUrl": "https://picsum.photos/seed/case300/400/500",
+      "description": "Labubu Case",
+      "imageUrl": "https://picsum.photos/seed/case300/400/400",
       "imageHint": "glowing chest"
     },
     {
       "id": "case-500",
-      "description": "Legendary Case",
-      "imageUrl": "https://picsum.photos/seed/case500/400/500",
+      "description": "Apex Case",
+      "imageUrl": "https://picsum.photos/seed/case500/400/400",
       "imageHint": "epic chest"
     },
     {

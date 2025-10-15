@@ -12,9 +12,10 @@ export const userProfile = {
 };
 
 export const cases = [
-  { id: 'case-1', name: 'Common Case', cost: 180, image: findImage('case-180') },
-  { id: 'case-2', name: 'Rare Case', cost: 300, image: findImage('case-300') },
-  { id: 'case-3', name: 'Legendary Case', cost: 500, image: findImage('case-500') },
+  { id: 'case-1', name: 'Free Box', cost: 0, image: findImage('case-free') },
+  { id: 'case-2', name: 'Floor Case', cost: 180, image: findImage('case-180') },
+  { id: 'case-3', name: 'Labubu Case', cost: 300, image: findImage('case-300') },
+  { id: 'case-4', name: 'Apex Case', cost: 500, image: findImage('case-500') },
 ];
 
 export const inventory = [
