@@ -1,3 +1,4 @@
+
 'use client';
 import { getLeaderboard, type LeaderboardEntry } from '@/lib/data';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -11,29 +12,34 @@ import { useTranslation } from '@/context/language-context';
 export default function LeaderboardPage() {
     const { t } = useTranslation();
     const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
-        // Load leaderboard from localStorage on component mount
-        setLeaderboard(getLeaderboard());
+        // This ensures the component is mounted on the client before doing client-side things
+        setIsClient(true);
+    }, []);
 
-        const handleFocus = () => {
+    useEffect(() => {
+        if (!isClient) return; // Don't run on server or before initial client render
+
+        // Load leaderboard from localStorage on component mount
+        const loadLeaderboard = () => {
             setLeaderboard(getLeaderboard());
         };
-        
+
+        loadLeaderboard();
+
         // Refresh data when window gets focus
-        window.addEventListener('focus', handleFocus);
+        window.addEventListener('focus', loadLeaderboard);
         
         // Also listen for a custom event that we can dispatch after opening a case
-        const handleStorageUpdate = () => {
-             setLeaderboard(getLeaderboard());
-        }
-        window.addEventListener('leaderboardUpdated', handleStorageUpdate);
+        window.addEventListener('leaderboardUpdated', loadLeaderboard);
 
         return () => {
-            window.removeEventListener('focus', handleFocus);
-            window.removeEventListener('leaderboardUpdated', handleStorageUpdate);
+            window.removeEventListener('focus', loadLeaderboard);
+            window.removeEventListener('leaderboardUpdated', loadLeaderboard);
         }
-    }, []);
+    }, [isClient]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,7 +67,7 @@ export default function LeaderboardPage() {
             </TableHeader>
             <TableBody>
               {leaderboard.map((entry, index) => (
-                <TableRow key={entry.rank} className={index < 3 ? 'font-bold' : ''}>
+                <TableRow key={entry.user + entry.rank} className={index < 3 ? 'font-bold' : ''}>
                   <TableCell>
                     <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted">
                       {index < 3 ? (
