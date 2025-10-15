@@ -22,16 +22,20 @@ export default function Header() {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [stars, setStars] = useState(defaultUserProfile.stars);
+  const [formattedStars, setFormattedStars] = useState(defaultUserProfile.stars.toString());
   const wallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
   
   const updateStars = useCallback(() => {
-    setStars(defaultUserProfile.stars);
+    const currentStars = defaultUserProfile.stars;
+    setStars(currentStars);
   }, []);
 
   useEffect(() => {
-    // This now correctly runs only on the client, avoiding the hydration error.
+    // This effect runs only on the client.
+    // It updates the star count and sets the locale-specific formatted string.
     updateStars();
+    setFormattedStars(stars.toLocaleString());
 
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
@@ -60,7 +64,8 @@ export default function Header() {
     // Clean up interval on component unmount
     return () => clearInterval(interval);
 
-  }, [updateStars]);
+  }, [updateStars, stars]);
+
 
   const formatAddress = (address: string) => {
     if (!address) return '';
@@ -93,7 +98,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-primary/30">
             <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} className="w-5 h-5" />
-            <span className="font-bold text-lg text-foreground">{stars.toLocaleString()}</span>
+            <span className="font-bold text-lg text-foreground">{formattedStars}</span>
           </div>
           {wallet ? (
              <Button
