@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,33 +14,38 @@ import { TonkeeperIcon } from './icons/tonkeeper-icon';
 import { MyTonWalletIcon } from './icons/mytonwallet-icon';
 import { TonhubIcon } from './icons/tonhub-icon';
 import { TonConnectIcon } from './icons/ton-connect-icon';
+import { useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
+import { WALLET_ID } from '@tonconnect/ui-react';
+
 
 const walletProviders = [
-  { name: 'Tonkeeper', icon: <TonkeeperIcon className="w-12 h-12" /> },
-  { name: 'MyTonWallet', icon: <MyTonWalletIcon className="w-12 h-12" /> },
-  { name: 'Tonhub', icon: <TonhubIcon className="w-12 h-12" /> },
+  { name: 'Tonkeeper', icon: <TonkeeperIcon className="w-12 h-12" />, id: 'tonkeeper' as WALLET_ID },
+  { name: 'MyTonWallet', icon: <MyTonWalletIcon className="w-12 h-12" />, id: 'mytonwallet' as WALLET_ID },
+  { name: 'Tonhub', icon: <TonhubIcon className="w-12 h-12" />, id: 'tonhub' as WALLET_ID },
 ];
 
 export function WalletConnectDialog() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
+  const { open } = useTonConnectModal();
+  const [tonConnectUI] = useTonConnectUI();
 
-  const handleConnect = () => {
-    // In a real app, you'd handle wallet connection logic here.
-    setIsWalletConnected(true);
-    setIsOpen(false);
+  const handleConnect = (walletId: WALLET_ID) => {
+    tonConnectUI.connectWallet(walletId);
   };
 
+  const handleTelegramConnect = () => {
+    tonConnectUI.connectWallet('telegram-wallet');
+  }
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button
           size="sm"
-          variant={isWalletConnected ? 'secondary' : 'outline'}
+          variant={'outline'}
           className="border-primary/50 text-primary"
         >
           <Wallet className="mr-2 h-4 w-4" />
-          {isWalletConnected ? 'Connected' : 'Connect Wallet'}
+          {'Connect Wallet'}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md bg-card/80 backdrop-blur-lg border-primary/30 p-0">
@@ -52,7 +56,7 @@ export function WalletConnectDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="p-6 pt-2 flex flex-col gap-4">
-          <Button size="lg" className="w-full h-12 bg-primary/90 hover:bg-primary text-primary-foreground" onClick={handleConnect}>
+          <Button size="lg" className="w-full h-12 bg-primary/90 hover:bg-primary text-primary-foreground" onClick={handleTelegramConnect}>
             Connect Wallet in Telegram
             <Send className="ml-2 h-4 w-4" />
           </Button>
@@ -61,7 +65,7 @@ export function WalletConnectDialog() {
 
           <div className="grid grid-cols-3 gap-4 text-center">
             {walletProviders.map((wallet) => (
-              <div key={wallet.name} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={handleConnect}>
+              <div key={wallet.name} className="flex flex-col items-center gap-2 cursor-pointer group" onClick={() => handleConnect(wallet.id)}>
                 <div className="p-2 rounded-xl bg-background/50 group-hover:bg-accent transition-colors">
                   {wallet.icon}
                 </div>
