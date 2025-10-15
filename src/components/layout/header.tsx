@@ -42,24 +42,10 @@ export default function Header() {
           username: tgUser.username,
           photo_url: tgUser.photo_url
         });
-      } else {
-        // Fallback for when not in Telegram environment
-        setUser({
-            id: 12345,
-            first_name: defaultUserProfile.name,
-            username: defaultUserProfile.telegramId.replace('@', ''),
-            photo_url: defaultUserProfile.avatarUrl,
-        })
       }
       setLoading(false);
     } else {
-        // Fallback for development
-        setUser({
-            id: 12345,
-            first_name: defaultUserProfile.name,
-            username: defaultUserProfile.telegramId.replace('@', ''),
-            photo_url: defaultUserProfile.avatarUrl,
-        })
+        // Not in telegram environment
         setLoading(false);
     }
   }, []);
@@ -70,7 +56,7 @@ export default function Header() {
   }
   
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
-  const avatarUrl = user?.photo_url || defaultUserProfile.avatarUrl;
+  const avatarUrl = user?.photo_url;
   const avatarFallback = displayName.charAt(0).toUpperCase();
 
   return (
@@ -85,7 +71,7 @@ export default function Header() {
           ) : (
             <>
               <Avatar className="w-9 h-9 border-2 border-primary">
-                <AvatarImage src={avatarUrl} alt={displayName} />
+                {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
                 <AvatarFallback>{avatarFallback}</AvatarFallback>
               </Avatar>
               <span className="text-lg font-bold text-foreground">{displayName}</span>

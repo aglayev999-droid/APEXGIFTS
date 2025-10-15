@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { userProfile as defaultUserProfile } from '@/lib/data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Share2, Bot, PlusCircle } from 'lucide-react';
@@ -41,12 +40,6 @@ export default function ProfilePage() {
       setLoading(false);
     } else {
         // Fallback for when not in Telegram environment
-        setUser({
-            id: 12345,
-            first_name: defaultUserProfile.name,
-            username: defaultUserProfile.telegramId.replace('@', ''),
-            photo_url: defaultUserProfile.avatarUrl,
-        })
         setLoading(false);
     }
   }, []);
@@ -61,7 +54,7 @@ export default function ProfilePage() {
 
   const displayName = user ? `${user.first_name} ${user.last_name || ''}`.trim() : 'Guest';
   const displayUsername = user?.username ? `@${user.username}` : 'No Telegram ID';
-  const avatarUrl = user?.photo_url || defaultUserProfile.avatarUrl;
+  const avatarUrl = user?.photo_url;
   const avatarFallback = displayName.charAt(0).toUpperCase();
 
   return (
@@ -76,7 +69,7 @@ export default function ProfilePage() {
         ) : (
             <>
                 <Avatar className="w-24 h-24 border-4 border-primary mb-4">
-                  <AvatarImage src={avatarUrl} alt={displayName} />
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
                   <AvatarFallback>{avatarFallback}</AvatarFallback>
                 </Avatar>
                 <h1 className="text-3xl font-bold font-headline">{displayName}</h1>
