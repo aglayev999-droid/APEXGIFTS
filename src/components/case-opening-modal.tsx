@@ -155,13 +155,12 @@ export function CaseOpeningModal({
         userProfile.stars -= totalCost;
     }
 
-    if (telegramUser) {
-        const currentUser = {
-            name: `${telegramUser.first_name} ${telegramUser.last_name || ''}`.trim(),
-            avatar: telegramUser.photo_url || ''
-        };
-        updateLeaderboard(currentUser, multiplier);
-    }
+    // Always update leaderboard, even for guests
+    const currentUserForLeaderboard = {
+        name: telegramUser ? `${telegramUser.first_name} ${telegramUser.last_name || ''}`.trim() : 'Guest',
+        avatar: telegramUser?.photo_url || ''
+    };
+    updateLeaderboard(currentUserForLeaderboard, multiplier);
     
     setForceRender(Math.random());
     onCaseOpened?.();
@@ -416,3 +415,5 @@ declare global {
         Telegram: any;
     }
 }
+
+    
