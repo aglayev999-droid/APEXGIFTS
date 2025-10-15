@@ -15,7 +15,7 @@ import { TonkeeperIcon } from './icons/tonkeeper-icon';
 import { MyTonWalletIcon } from './icons/mytonwallet-icon';
 import { TonhubIcon } from './icons/tonhub-icon';
 import { TonConnectIcon } from './icons/ton-connect-icon';
-import { useTonConnectUI } from '@tonconnect/ui-react';
+import { useTonConnectModal, useTonConnectUI } from '@tonconnect/ui-react';
 import type { WALLET_ID } from '@tonconnect/ui-react';
 
 
@@ -26,21 +26,27 @@ const walletProviders = [
 ];
 
 export function WalletConnectDialog() {
-  const [tonConnectUI] = useTonConnectUI();
+  const [tonConnectUI, setOptions] = useTonConnectUI();
+  const { open } = useTonConnectModal();
   const [isOpen, setIsOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  const handleConnect = async (walletId: WALLET_ID | 'telegram-wallet') => {
+  const handleConnect = async (walletId: WALLET_ID) => {
     try {
         setIsConnecting(true);
-        await tonConnectUI.connectWallet(walletId);
-        setIsOpen(false); // Close dialog on successful connection attempt
+        await tonConnectUI.connect(walletId);
+        setIsOpen(false);
     } catch (error) {
         console.error('Failed to connect wallet:', error);
     } finally {
         setIsConnecting(false);
     }
   };
+  
+  const handleTelegramConnect = () => {
+    open();
+    setIsOpen(false);
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -62,9 +68,9 @@ export function WalletConnectDialog() {
           </DialogDescription>
         </DialogHeader>
         <div className="p-6 pt-2 flex flex-col gap-4">
-          <Button size="lg" className="w-full h-12 bg-primary/90 hover:bg-primary text-primary-foreground" onClick={() => handleConnect('telegram-wallet')} disabled={isConnecting}>
-            {isConnecting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="ml-2 h-4 w-4" />}
-            {isConnecting ? 'Connecting...' : 'Connect Wallet in Telegram'}
+          <Button size="lg" className="w-full h-12 bg-primary/90 hover:bg-primary text-primary-foreground" onClick={handleTelegramConnect}>
+            <Send className="mr-2 h-4 w-4" />
+            Connect Wallet in Telegram
           </Button>
 
           <div className="text-center text-sm text-muted-foreground">Choose other application</div>
