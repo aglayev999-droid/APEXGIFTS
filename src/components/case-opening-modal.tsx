@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,7 +20,19 @@ import { Gift, Loader2 } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { addInventoryItem, userProfile } from '@/lib/data';
 
-const REVEAL_DURATION_MS = 3000;
+const REVEAL_DURATION_MS = 5000;
+const REEL_ITEM_WIDTH = 128; // 8rem in pixels (w-32)
+
+// Fisher-Yates shuffle algorithm
+const shuffle = (array: any[]) => {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex !== 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+  }
+  return array;
+};
 
 function PrizeDisplay({ prize, className }: { prize: ImagePlaceholder, className?: string }) {
   const isStarPrize = prize.description.includes('Stars');
@@ -58,6 +70,8 @@ export function CaseOpeningModal({
   const [isOpen, setIsOpen] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [wonPrize, setWonPrize] = useState<ImagePlaceholder | null>(null);
+  const [reelItems, setReelItems] = useState<ImagePlaceholder[]>([]);
+  const [reelOffset, setReelOffset] = useState(0);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -73,26 +87,45 @@ export function CaseOpeningModal({
     
     setWonPrize(null);
     setIsSpinning(true);
-
     if (caseItem.cost > 0) {
         userProfile.stars -= caseItem.cost;
     }
 
-    const prizeIndex = Math.floor(Math.random() * caseItem.prizes.length);
-    const finalPrize = caseItem.prizes[prizeIndex];
+    // --- Roulette Logic ---
+    const prizePool = caseItem.prizes;
+    const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
     
+    // Create a long reel of items for the animation
+    const reel = Array(5).fill(prizePool).flat();
+    const shuffledReel = shuffle([...reel]);
+
+    // Place the winning item at a predictable position towards the end
+    const winningIndex = shuffledReel.length - 5;
+    shuffledReel[winningIndex] = winningPrize;
+
+    setReelItems(shuffledReel);
+    setReelOffset(0); // Reset position
+
+    // Force a browser reflow before starting the transition
+    requestAnimationFrame(() => {
+        // Calculate the final offset to center the winning item
+        const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2);
+        setReelOffset(targetOffset);
+    });
+    // --- End Roulette Logic ---
+
     setTimeout(() => {
       setIsSpinning(false);
-      setWonPrize(finalPrize);
+      setWonPrize(winningPrize);
       
-      if (!finalPrize.description.includes('Stars')) {
+      if (!winningPrize.description.includes('Stars')) {
         addInventoryItem({
-            id: `${finalPrize.id}-${Date.now()}`,
-            name: finalPrize.description,
-            image: finalPrize,
+            id: `${winningPrize.id}-${Date.now()}`,
+            name: winningPrize.description,
+            image: winningPrize,
         });
       } else {
-        const starAmount = parseInt(finalPrize.description.split(' ')[0]);
+        const starAmount = parseInt(winningPrize.description.split(' ')[0]);
         if (!isNaN(starAmount)) {
             userProfile.stars += starAmount;
         }
@@ -105,6 +138,8 @@ export function CaseOpeningModal({
     setIsOpen(false);
     setWonPrize(null);
     setIsSpinning(false);
+    setReelItems([]);
+    setReelOffset(0);
   }
 
   const handleGoToInventory = () => {
@@ -166,9 +201,27 @@ export function CaseOpeningModal({
 
   const renderSpinningView = () => (
     <div className="h-full flex flex-col items-center justify-center relative overflow-hidden bg-card/80 text-center p-6">
-      <Loader2 className="w-16 h-16 text-primary animate-spin mb-8" />
-      <h2 className="text-3xl font-bold font-headline">Opening Case...</h2>
-      <p className="text-muted-foreground mt-2">Good luck!</p>
+      <h2 className="text-3xl font-bold font-headline mb-8">Opening...</h2>
+      <div className="relative w-full h-32 flex items-center justify-center">
+        {/* The Marker */}
+        <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-0.5 h-36 bg-primary z-10 rounded-full" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 100%, 0 0, 100% 0)'}}/>
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 0, 0 100%, 100% 100%)'}}/>
+        
+        {/* The Reel */}
+        <div 
+          className="absolute left-1/2 h-full flex items-center transition-transform duration-5000 ease-out"
+          style={{ transform: `translateX(calc(-${reelOffset}px))` }}
+        >
+          {reelItems.map((prize, index) => (
+            <div key={`${prize.id}-${index}`} className="w-32 h-32 shrink-0 p-2">
+              <div className="w-full h-full bg-background/30 rounded-lg p-1">
+                <PrizeDisplay prize={prize} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 

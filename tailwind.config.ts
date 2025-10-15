@@ -15,6 +15,12 @@ export default {
         headline: ['Poppins', 'sans-serif'],
         code: ['monospace'],
       },
+      transitionTimingFunction: {
+        'out-expo': 'cubic-bezier(0.19, 1, 0.22, 1)',
+      },
+      transitionDuration: {
+        '5000': '5000ms',
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
