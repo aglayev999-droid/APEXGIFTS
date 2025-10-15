@@ -12,7 +12,8 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    if message.text == '/start deposit':
+    # Check if the start command has a payload (deep link)
+    if len(message.text.split()) > 1 and message.text.split()[1] == 'deposit':
         command_deposit(message)
         return
 
@@ -65,8 +66,10 @@ def checkout(pre_checkout_query):
 
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
+    # Here you would typically update the user's balance in your database
+    # For now, we just send a confirmation message.
     bot.send_message(message.chat.id,
-                     'Hooray! Thanks for your payment of {} stars. Your balance will be updated shortly.'.format(
+                     'Hooray! Thanks for your payment. You have received {} stars.'.format(
                          message.successful_payment.total_amount,
                          ))
 

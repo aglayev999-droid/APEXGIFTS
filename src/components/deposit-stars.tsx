@@ -23,7 +23,7 @@ export function DepositStars() {
       tg.openTelegramLink(`https://t.me/apexgiftbot?start=deposit`);
 
       // We don't know when the user will finish, so we can reset the button state after a short delay
-      setTimeout(() => setIsDepositing(false), 2000);
+      setTimeout(() => setIsDepositing(false), 3000);
 
     } else {
         toast({
