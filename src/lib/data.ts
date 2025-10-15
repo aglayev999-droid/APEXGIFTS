@@ -61,12 +61,16 @@ export const cases = [
   { id: 'case-4', name: 'Apex Case', cost: 500, image: findImage('case-500'), prizes: labubuCasePrizes },
 ];
 
-type InventoryItem = { id: string; name: string; image: ImagePlaceholder };
+export type InventoryItem = { id: string; name: string; image: ImagePlaceholder };
 
 export let inventory: InventoryItem[] = [];
 
 export const addInventoryItem = (item: InventoryItem) => {
     inventory.push(item);
+};
+
+export const removeInventoryItem = (itemId: string) => {
+    inventory = inventory.filter(item => item.id !== itemId);
 };
 
 export const allPrizes = [...new Set([...freeCasePrizes, ...floorCasePrizes, ...labubuCasePrizes, ...apexCasePrizes])];

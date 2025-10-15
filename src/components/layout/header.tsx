@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { userProfile as defaultUserProfile } from '@/lib/data';
 import { useTonConnectUI, useTonWallet } from '@tonconnect/ui-react';
@@ -21,13 +21,17 @@ type TelegramUser = {
 export default function Header() {
   const [user, setUser] = useState<TelegramUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const [formattedStars, setFormattedStars] = useState<string | number>(defaultUserProfile.stars);
+  const [stars, setStars] = useState(defaultUserProfile.stars);
   const wallet = useTonWallet();
   const [tonConnectUI] = useTonConnectUI();
+  
+  const updateStars = useCallback(() => {
+    setStars(defaultUserProfile.stars);
+  }, []);
 
   useEffect(() => {
     // This now correctly runs only on the client, avoiding the hydration error.
-    setFormattedStars(defaultUserProfile.stars.toLocaleString());
+    updateStars();
 
     if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
@@ -49,7 +53,14 @@ export default function Header() {
         // Not in telegram environment
         setLoading(false);
     }
-  }, []);
+    
+    // Create an interval to check for balance changes
+    const interval = setInterval(updateStars, 500); // Check every half a second
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(interval);
+
+  }, [updateStars]);
 
   const formatAddress = (address: string) => {
     if (!address) return '';
@@ -82,7 +93,7 @@ export default function Header() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-primary/30">
             <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} className="w-5 h-5" />
-            <span className="font-bold text-lg text-foreground">{formattedStars}</span>
+            <span className="font-bold text-lg text-foreground">{stars.toLocaleString()}</span>
           </div>
           {wallet ? (
              <Button

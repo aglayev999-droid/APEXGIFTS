@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, type ReactNode, useMemo } from 'react';
+import { useState, type ReactNode, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -74,6 +74,7 @@ export function CaseOpeningModal({
   const [reelOffset, setReelOffset] = useState(0);
   const router = useRouter();
   const { toast } = useToast();
+  const [_, setForceRender] = useState(0);
 
   const handleOpenCase = () => {
     if (userProfile.stars < caseItem.cost && caseItem.cost > 0) {
@@ -87,21 +88,36 @@ export function CaseOpeningModal({
     
     setWonPrize(null);
     setIsSpinning(true);
+    
+    // Deduct stars for opening the case
     if (caseItem.cost > 0) {
         userProfile.stars -= caseItem.cost;
+        setForceRender(Math.random()); // force re-render to update header
     }
 
     // --- Roulette Logic ---
     const prizePool = caseItem.prizes;
     
-    // Create a long reel of items for the animation, ensuring it's well shuffled.
-    const reel = shuffle(Array(50).fill(prizePool).flat());
+    const shuffledPool = shuffle([...prizePool]);
+    const reel = [...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool, ...shuffledPool];
 
-    // The winning index is a fixed position towards the end of the reel.
-    const winningIndex = reel.length - 5;
+    // Determine the winning prize.
+    const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
     
-    // The actual winning prize is determined by what's at that fixed index.
-    const winningPrize = reel[winningIndex];
+    // Find a valid index for the winning prize in the latter half of the reel
+    let winningIndex = -1;
+    for (let i = Math.floor(reel.length / 2); i < reel.length; i++) {
+        if (reel[i].id === winningPrize.id) {
+            winningIndex = i;
+            break;
+        }
+    }
+    // Fallback if not found (should be rare)
+    if (winningIndex === -1) {
+        reel[reel.length - 5] = winningPrize;
+        winningIndex = reel.length - 5;
+    }
+
 
     setReelItems(reel);
     setReelOffset(0); // Reset position
@@ -130,7 +146,7 @@ export function CaseOpeningModal({
             userProfile.stars += starAmount;
         }
       }
-
+      setForceRender(Math.random()); // force re-render to update header
     }, REVEAL_DURATION_MS);
   };
 
@@ -174,7 +190,7 @@ export function CaseOpeningModal({
             disabled={isSpinning}
           >
               <div className='flex items-center justify-center gap-2'>
-                <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost}`: 'Spin for Free'}</span>
+                <span>{caseItem.cost > 0 ? `Spin for ${caseItem.cost.toLocaleString()}`: 'Spin for Free'}</span>
                 {caseItem.cost > 0 && <Image src="https://i.ibb.co/RkKvqDcd/stars.png" alt="Stars" width={20} height={20} />}
               </div>
           </Button>
@@ -256,4 +272,3 @@ export function CaseOpeningModal({
     </Dialog>
   );
 }
-
