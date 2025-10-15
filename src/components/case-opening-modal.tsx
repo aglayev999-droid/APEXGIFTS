@@ -119,6 +119,7 @@ export function CaseOpeningModal({
         const winningPrize = prizePool[Math.floor(Math.random() * prizePool.length)];
         
         let winningIndex = -1;
+        // Find a winning prize in the last 30% of the reel to ensure it spins for a bit
         for (let j = Math.floor(reelItems.length * 0.7); j < reelItems.length - 5; j++) {
             if (reelItems[j].id === winningPrize.id) {
                 winningIndex = j;
@@ -126,6 +127,7 @@ export function CaseOpeningModal({
             }
         }
 
+        // Fallback if not found (should be rare)
         if (winningIndex === -1) {
             winningIndex = reelItems.length - 10;
             reelItems[winningIndex] = winningPrize;
@@ -143,6 +145,7 @@ export function CaseOpeningModal({
 
     setReels(newReels);
 
+    // Use requestAnimationFrame to ensure the initial state is rendered before the transition starts
     requestAnimationFrame(() => {
         setReels(prevReels => prevReels.map((reel, index) => {
              let winningIndex = -1;
@@ -154,7 +157,8 @@ export function CaseOpeningModal({
              }
              if (winningIndex === -1) { winningIndex = reel.items.length - 10; }
 
-            const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6);
+            // Calculate the target offset to center the winning prize
+            const jitter = (Math.random() - 0.5) * (REEL_ITEM_WIDTH * 0.6); // Randomness for visual variety
             const targetOffset = (winningIndex * REEL_ITEM_WIDTH) - (REEL_ITEM_WIDTH / 2) + jitter;
             return { ...reel, offset: targetOffset };
         }));
@@ -218,12 +222,20 @@ export function CaseOpeningModal({
                 <RadioGroup 
                     defaultValue="1" 
                     className="grid grid-cols-4 gap-2"
+                    value={multiplier.toString()}
                     onValueChange={(val) => setMultiplier(parseInt(val) as Multiplier)}
                 >
                     {MULTIPLIERS.map(m => (
                         <div key={m}>
                             <RadioGroupItem value={m.toString()} id={`m-${m}`} className="sr-only" />
-                            <Label htmlFor={`m-${m}`} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer [&:has([data-state=checked])]:border-primary">
+                            <Label 
+                                htmlFor={`m-${m}`} 
+                                className={cn(
+                                    "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-3 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                    "transition-colors duration-300",
+                                    "[&:has([data-state=checked])]:border-primary [&:has([data-state=checked])]:bg-primary [&:has([data-state=checked])]:text-primary-foreground"
+                                )}
+                            >
                                 {m}x
                             </Label>
                         </div>
@@ -240,10 +252,12 @@ export function CaseOpeningModal({
             onClick={handleOpenCase}
             disabled={isSpinning}
           >
+            {isSpinning ? <Loader2 className="w-6 h-6 animate-spin" /> : (
               <div className='flex items-center justify-center gap-2'>
                 <span>{caseItem.cost > 0 ? `Spin for ${totalCost.toLocaleString()}`: 'Spin for Free'}</span>
                 {caseItem.cost > 0 && <Image src="https://i.ibb.co/fmx59f8/stars.png" alt="Stars" width={20} height={20} />}
               </div>
+            )}
           </Button>
            <Accordion type="single" collapsible className="w-full">
             <AccordionItem value="item-1" className="border-none">
@@ -272,7 +286,7 @@ export function CaseOpeningModal({
       <ScrollArea className="w-full flex-grow">
           <div className='flex flex-col items-center gap-4 py-4'>
             {reels.map((reel) => (
-              <div key={reel.id} className="relative w-full h-32 flex items-center justify-center">
+              <div key={reel.id} className="relative w-full h-32 flex items-center justify-center overflow-hidden">
                 {/* The Marker */}
                 <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 w-0.5 h-36 bg-primary z-10 rounded-full" />
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-2 bg-primary z-10" style={{clipPath: 'polygon(50% 100%, 0 0, 100% 0)'}}/>
@@ -280,8 +294,12 @@ export function CaseOpeningModal({
                 
                 {/* The Reel */}
                 <div 
-                  className="absolute left-1/2 h-full flex items-center transition-transform duration-5000 ease-out"
-                  style={{ transform: `translateX(calc(-${reel.offset}px))` }}
+                  className="absolute left-1/2 h-full flex items-center transition-transform"
+                  style={{ 
+                      transform: `translateX(calc(-${reel.offset}px))`,
+                      transitionDuration: `${REVEAL_DURATION_MS}ms`,
+                      transitionTimingFunction: 'cubic-bezier(0.1, 0, 0.2, 1)'
+                  }}
                 >
                   {reel.items.map((prize, index) => (
                     <div key={`${prize.id}-${index}`} className="w-32 h-32 shrink-0 p-2">
@@ -334,4 +352,3 @@ export function CaseOpeningModal({
     </Dialog>
   );
 }
-
