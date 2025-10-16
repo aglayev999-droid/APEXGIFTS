@@ -26,20 +26,15 @@ app = Flask(__name__)
 # This route is used by Telegram to send updates to the bot
 @app.route('/' + TOKEN, methods=['POST'])
 def get_message():
-    # No try/except block to see the real error in Render logs
     json_string = request.get_data().decode('utf-8')
     update = telebot.types.Update.de_json(json_string)
     bot.process_new_updates([update])
     return "!", 200
 
-# This route is used to set the webhook (for initial setup)
+# This route is just a health check, it doesn't set the webhook anymore.
 @app.route("/")
-def webhook():
-    if APP_URL and TOKEN:
-        bot.remove_webhook()
-        bot.set_webhook(url=APP_URL + '/' + TOKEN)
-        return "Webhook set!", 200
-    return "APP_URL and TOKEN environment variables are not set!", 500
+def health_check():
+    return "Bot is alive!", 200
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
