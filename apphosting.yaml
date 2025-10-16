@@ -6,16 +6,14 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+build:
+  # The command to build your app
+  run: npm run build
+# The 'static' section tells App Hosting to serve files from the 'out' directory.
 static:
   # The directory that contains the static assets to be deployed.
   directory: out
   # A list of glob patterns for files that should not be deployed.
   exclude:
-    - firebase.json
     - .firebaserc
     - README.md
-run:
-  # The command to build your app
-  build: npm run build
-  # The command to start your app
-  start: npx serve -s out -p $PORT
