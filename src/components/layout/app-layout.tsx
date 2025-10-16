@@ -27,7 +27,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     // This ensures the window object is available before setting the URL.
     if (typeof window !== 'undefined') {
-      // The rewrite in next.config.ts handles this path
       setManifestUrl(`${window.location.origin}/tonconnect-manifest.json`);
     }
     

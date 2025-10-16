@@ -1,5 +1,7 @@
 {
-  "url": "https://<your-app-url>",
+  "url": "https://studio-8022996200.web.app",
   "name": "Apex Gift Bot",
-  "iconUrl": "https://<your-app-url>/icon.png"
+  "iconUrl": "https://studio-8022996200.web.app/icon.png",
+  "termsOfUseUrl": "https://studio-8022996200.web.app/terms-of-use.html",
+  "privacyPolicyUrl": "https://studio-8022996200.web.app/privacy-policy.html"
 }

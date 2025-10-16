@@ -2,9 +2,6 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: [
-    'https://6000-firebase-studio-1760519392670.cluster-gjstlrnqpna56vr4xhdezmmq4e.cloudworkstations.dev',
-  ],
   /* config options here */
   images: {
     remotePatterns: [
@@ -27,20 +24,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https'
         hostname: 'i.ibb.co',
         port: '',
         pathname: '/**',
       }
     ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/tonconnect-manifest.json',
-        destination: '/api/tonconnect-manifest',
-      },
-    ];
   },
 };
 
