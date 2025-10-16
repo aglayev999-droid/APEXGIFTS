@@ -7,14 +7,8 @@ from flask import Flask, request
 # It's recommended to use environment variables for sensitive data.
 # These will be set in your deployment environment (e.g., Render.com).
 TOKEN = os.environ.get("BOT_TOKEN")
-# HARDCODED a permanent fix.
-FIREBASE_PROJECT_ID = "studio-8022996200"
-
-# Check if FIREBASE_PROJECT_ID is set, otherwise log an error.
-if FIREBASE_PROJECT_ID:
-    APP_URL = f"https://{FIREBASE_PROJECT_ID}.web.app"
-else:
-    APP_URL = None # Set to None if the project ID is missing
+# HARDCODED a permanent fix by using the direct URL.
+APP_URL = "https://studio-8022996200.web.app"
 
 PAYMENT_PROVIDER_TOKEN = os.environ.get("PAYMENT_PROVIDER_TOKEN")
 
@@ -50,7 +44,7 @@ def send_welcome(message):
     text = message.text
     
     if not APP_URL:
-        logging.error("APP_URL is not set because FIREBASE_PROJECT_ID is missing!")
+        logging.error("APP_URL is not set!")
         bot.send_message(chat_id, "Sorry, the application is not configured correctly. The web app address is missing. Please contact the administrator.")
         return
 
@@ -125,5 +119,5 @@ if __name__ == "__main__":
     # This is for local development. Render will use gunicorn.
     # We remove the set_webhook call from here to avoid issues on Render.
     if not APP_URL:
-        logging.warning("Warning: FIREBASE_PROJECT_ID is not set. The bot might not function correctly with the web app.")
+        logging.warning("Warning: APP_URL is not set. The bot might not function correctly with the web app.")
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
