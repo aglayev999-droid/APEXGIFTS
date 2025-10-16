@@ -31,7 +31,7 @@ def get_message():
     bot.process_new_updates([update])
     return "!", 200
 
-# This route is just a health check, it doesn't set the webhook anymore.
+# This route is just a health check
 @app.route("/")
 def health_check():
     return "Bot is alive!", 200
