@@ -7,8 +7,22 @@ import Header from './header';
 import BottomNav from './bottom-nav';
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
+function SplashScreen() {
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-background">
+            <div className="relative flex flex-col items-center gap-4">
+                <h1 className="text-7xl font-bold tracking-widest text-primary animate-splash-total">
+                    APEX
+                </h1>
+            </div>
+        </div>
+    );
+}
+
+
 export default function AppLayout({ children }: { children: ReactNode }) {
   const [manifestUrl, setManifestUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // This ensures the window object is available before setting the URL.
@@ -20,11 +34,24 @@ export default function AppLayout({ children }: { children: ReactNode }) {
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
     }
+
+    // Hide splash screen after animation
+    const timer = setTimeout(() => {
+        setIsLoading(false);
+    }, 3500); // Must match the duration of the splash-total-animation in globals.css
+
+    return () => clearTimeout(timer);
+
   }, []);
+  
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
 
   // Don't render the provider until the manifestUrl is set on the client
   if (!manifestUrl) {
-    return null; 
+    return null; // or a minimal loading state that doesn't show the main layout
   }
 
   return (
