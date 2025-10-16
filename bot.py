@@ -7,7 +7,8 @@ from flask import Flask, request
 # It's recommended to use environment variables for sensitive data.
 # These will be set in your deployment environment (e.g., Render.com).
 TOKEN = os.environ.get("BOT_TOKEN")
-APP_URL = os.environ.get("APP_URL") 
+# THIS IS THE CORRECT URL FOR THE FIREBASE HOSTED WEB APP
+APP_URL = f"https://{os.environ.get('FIREBASE_PROJECT_ID')}.web.app"
 PAYMENT_PROVIDER_TOKEN = os.environ.get("PAYMENT_PROVIDER_TOKEN")
 
 # Basic logging setup
