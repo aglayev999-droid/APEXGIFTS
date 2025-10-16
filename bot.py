@@ -18,21 +18,22 @@ if not TOKEN:
     # Exit or handle the error appropriately if the token is missing
     exit()
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(TOKEN, threaded=False)
 app = Flask(__name__)
 
 # This route is used by Telegram to send updates to the bot
 @app.route('/' + TOKEN, methods=['POST'])
 def get_message():
     try:
-        update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
         bot.process_new_updates([update])
         return "!", 200
     except Exception as e:
         logging.error(f"Error processing update: {e}")
         return "Error", 500
 
-# This route is just a health check
+# This route is just a health check, but we can also use it for the webhook
 @app.route("/")
 def health_check():
     return "Bot is alive and waiting for messages on its token route!", 200
@@ -115,4 +116,6 @@ def got_payment(message):
     # Here you would typically update the user's balance in your database.
 
 if __name__ == "__main__":
+    # This is for local development. Render will use gunicorn.
+    # We remove the set_webhook call from here to avoid issues on Render.
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
