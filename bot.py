@@ -42,9 +42,9 @@ def send_welcome(message):
     chat_id = message.chat.id
     text = message.text
     
-    if not APP_URL:
-        logging.error("APP_URL is not set!")
-        bot.send_message(chat_id, "Sorry, the application is not configured correctly.")
+    if not APP_URL or "None.web.app" in APP_URL:
+        logging.error("APP_URL is not set or FIREBASE_PROJECT_ID is missing!")
+        bot.send_message(chat_id, "Sorry, the application is not configured correctly. The web app address is missing.")
         return
 
     # Check for deep link payload for deposits
