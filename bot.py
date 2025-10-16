@@ -7,7 +7,8 @@ from flask import Flask, request
 # It's recommended to use environment variables for sensitive data.
 # These will be set in your deployment environment (e.g., Render.com).
 TOKEN = os.environ.get("BOT_TOKEN")
-FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
+# HARDCODED a permanent fix.
+FIREBASE_PROJECT_ID = "studio-8022996200"
 
 # Check if FIREBASE_PROJECT_ID is set, otherwise log an error.
 if FIREBASE_PROJECT_ID:
