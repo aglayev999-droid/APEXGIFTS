@@ -7,8 +7,14 @@ from flask import Flask, request
 # It's recommended to use environment variables for sensitive data.
 # These will be set in your deployment environment (e.g., Render.com).
 TOKEN = os.environ.get("BOT_TOKEN")
-# THIS IS THE CORRECT URL FOR THE FIREBASE HOSTED WEB APP
-APP_URL = f"https://{os.environ.get('FIREBASE_PROJECT_ID')}.web.app"
+FIREBASE_PROJECT_ID = os.environ.get("FIREBASE_PROJECT_ID")
+
+# Check if FIREBASE_PROJECT_ID is set, otherwise log an error.
+if FIREBASE_PROJECT_ID:
+    APP_URL = f"https://{FIREBASE_PROJECT_ID}.web.app"
+else:
+    APP_URL = None # Set to None if the project ID is missing
+
 PAYMENT_PROVIDER_TOKEN = os.environ.get("PAYMENT_PROVIDER_TOKEN")
 
 # Basic logging setup
@@ -42,9 +48,9 @@ def send_welcome(message):
     chat_id = message.chat.id
     text = message.text
     
-    if not APP_URL or "None.web.app" in APP_URL:
-        logging.error("APP_URL is not set or FIREBASE_PROJECT_ID is missing!")
-        bot.send_message(chat_id, "Sorry, the application is not configured correctly. The web app address is missing.")
+    if not APP_URL:
+        logging.error("APP_URL is not set because FIREBASE_PROJECT_ID is missing!")
+        bot.send_message(chat_id, "Sorry, the application is not configured correctly. The web app address is missing. Please contact the administrator.")
         return
 
     # Check for deep link payload for deposits
@@ -117,4 +123,6 @@ def got_payment(message):
 if __name__ == "__main__":
     # This is for local development. Render will use gunicorn.
     # We remove the set_webhook call from here to avoid issues on Render.
+    if not APP_URL:
+        logging.warning("Warning: FIREBASE_PROJECT_ID is not set. The bot might not function correctly with the web app.")
     app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
