@@ -60,6 +60,17 @@
     }
   }
 
+  @keyframes pulse-logo {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.15);
+      opacity: 0.8;
+    }
+  }
+
   .animate-won-shimmer {
     position: relative;
     overflow: hidden;
@@ -83,5 +94,9 @@
 
   .animate-won-glow {
     animation: glow 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-logo {
+    animation: pulse-logo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
