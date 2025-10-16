@@ -1,12 +1,12 @@
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
+# This configuration is for a static Next.js site export.
+# It builds the site and then serves the static files from the 'out' directory.
+build:
+  run: npm run build
+start:
+  run: npx serve -s out -p $PORT
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
-build:
-  # This specifies the command to build your Next.js application.
-  run: npm run build
-start:
-  # This specifies the command to start your Next.js application after it's built.
-  run: npm run start
