@@ -22,21 +22,19 @@ bot = telebot.TeleBot(TOKEN, threaded=False)
 app = Flask(__name__)
 
 # This route is used by Telegram to send updates to the bot
-@app.route('/', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 def get_message():
-    try:
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return "!", 200
-    except Exception as e:
-        logging.error(f"Error processing update: {e}")
-        return "Error", 500
-
-# This route is just a health check
-@app.route("/")
-def health_check():
-    return "Bot is alive and waiting for messages on its token route!", 200
+    if request.method == 'POST':
+        try:
+            json_string = request.get_data().decode('utf-8')
+            update = telebot.types.Update.de_json(json_string)
+            bot.process_new_updates([update])
+            return "!", 200
+        except Exception as e:
+            logging.error(f"Error processing update: {e}")
+            return "Error", 500
+    # This is a health check for GET requests
+    return "Bot is alive and waiting for messages!", 200
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
