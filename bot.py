@@ -25,15 +25,12 @@ app = Flask(__name__)
 
 # This route is used by Telegram to send updates to the bot
 @app.route('/' + TOKEN, methods=['POST'])
-def getMessage():
-    try:
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return "!", 200
-    except Exception as e:
-        logging.error(f"Error processing update: {e}")
-        return "Error", 500
+def get_message():
+    # No try/except block to see the real error in Render logs
+    json_string = request.get_data().decode('utf-8')
+    update = telebot.types.Update.de_json(json_string)
+    bot.process_new_updates([update])
+    return "!", 200
 
 # This route is used to set the webhook (for initial setup)
 @app.route("/")
@@ -120,3 +117,6 @@ def got_payment(message):
     star_amount = message.successful_payment.total_amount / 100
     bot.send_message(message.chat.id, f"Hooray! Thanks for your payment. You have received {star_amount} stars.")
     # Here you would typically update the user's balance in your database.
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
