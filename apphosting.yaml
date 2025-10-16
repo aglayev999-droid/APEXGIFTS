@@ -2,11 +2,14 @@
 # https://firebase.google.com/docs/app-hosting/configure
 # This configuration is for a static Next.js site export.
 # It builds the site and then serves the static files from the 'out' directory.
-build:
-  run: npm run build
-start:
-  run: npx serve -s out -p $PORT
+run:
+  # The command to build your app
+  build: npm run build
+  # The command to start your app
+  start: npx serve -s out -p $PORT
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+
+    
