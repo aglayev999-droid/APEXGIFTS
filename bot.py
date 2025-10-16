@@ -23,13 +23,19 @@ if not TOKEN:
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
+# This route is used by Telegram to send updates to the bot
 @app.route('/' + TOKEN, methods=['POST'])
 def getMessage():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+    try:
+        json_string = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_string)
+        bot.process_new_updates([update])
+        return "!", 200
+    except Exception as e:
+        logging.error(f"Error processing update: {e}")
+        return "Error", 500
 
+# This route is used to set the webhook (for initial setup)
 @app.route("/")
 def webhook():
     if APP_URL and TOKEN:
@@ -38,8 +44,8 @@ def webhook():
         return "Webhook set!", 200
     return "APP_URL and TOKEN environment variables are not set!", 500
 
-
-def handle_start_command(message):
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
     chat_id = message.chat.id
     text = message.text
     
@@ -101,10 +107,6 @@ def handle_deposit(chat_id, amount):
         prices=prices
     )
 
-@bot.message_handler(commands=['start'])
-def send_welcome(message):
-    handle_start_command(message)
-
 @bot.message_handler(commands=['deposit'])
 def send_deposit_options(message):
     handle_deposit(message.chat.id, None)
@@ -118,10 +120,3 @@ def got_payment(message):
     star_amount = message.successful_payment.total_amount / 100
     bot.send_message(message.chat.id, f"Hooray! Thanks for your payment. You have received {star_amount} stars.")
     # Here you would typically update the user's balance in your database.
-
-
-# The following code is for local development and will not be used on Render
-# as Render uses a WSGI server like Gunicorn.
-if __name__ == '__main__':
-    logging.info("Starting Flask server for local development.")
-    app.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
