@@ -13,8 +13,6 @@ PAYMENT_PROVIDER_TOKEN = os.environ.get("PAYMENT_PROVIDER_TOKEN")
 # Basic logging setup
 logging.basicConfig(level=logging.INFO)
 
-# We are using webhook strategy, so polling is not needed.
-# The bot instance is created just to use the API methods.
 if not TOKEN:
     logging.error("BOT_TOKEN environment variable not set!")
     # Exit or handle the error appropriately if the token is missing
@@ -26,15 +24,18 @@ app = Flask(__name__)
 # This route is used by Telegram to send updates to the bot
 @app.route('/' + TOKEN, methods=['POST'])
 def get_message():
-    json_string = request.get_data().decode('utf-8')
-    update = telebot.types.Update.de_json(json_string)
-    bot.process_new_updates([update])
-    return "!", 200
+    try:
+        update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
+        bot.process_new_updates([update])
+        return "!", 200
+    except Exception as e:
+        logging.error(f"Error processing update: {e}")
+        return "Error", 500
 
 # This route is just a health check
 @app.route("/")
 def health_check():
-    return "Bot is alive!", 200
+    return "Bot is alive and waiting for messages on its token route!", 200
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
