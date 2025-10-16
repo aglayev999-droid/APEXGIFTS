@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -71,6 +72,27 @@
     }
   }
 
+  @keyframes fade-in-splash {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fade-out-splash {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes glow-splash {
+    0%, 100% {
+      text-shadow: 0 0 8px hsla(var(--primary), 0.6), 0 0 20px hsla(var(--primary), 0.4);
+      opacity: 1;
+    }
+    50% {
+      text-shadow: 0 0 16px hsla(var(--primary), 0.8), 0 0 40px hsla(var(--primary), 0.6);
+      opacity: 1;
+    }
+  }
+
   .animate-won-shimmer {
     position: relative;
     overflow: hidden;
@@ -99,4 +121,15 @@
   .animate-pulse-logo {
     animation: pulse-logo 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
+
+  .animate-fade-in-splash {
+    animation: fade-in-splash 1s ease-in-out forwards;
+  }
+  .animate-fade-out-splash {
+    animation: fade-out-splash 0.5s ease-in-out forwards;
+  }
+  .animate-glow-splash {
+    animation: glow-splash 2.5s ease-in-out infinite;
+  }
 }
+
